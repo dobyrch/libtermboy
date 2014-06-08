@@ -43,15 +43,16 @@ static int restore_font_height(void)
 
 	CHECK(fd = open("/dev/tty", O_RDONLY));
 
-        orig_font.op = KD_FONT_OP_GET;
-        orig_font.flags = 0;
-        orig_font.width = orig_font.height = 32;
-        orig_font.charcount = 1024;
-        orig_font.data = orig_font_data;
+        orig_font.op = KD_FONT_OP_SET;
         CHECK(ioctl(fd, KDFONTOP, &orig_font));
 
 	CHECK(close(fd));
 	return 0;
+}
+
+int main(void) {
+	set_font_height();
+	restore_font_height();
 }
 
 /*
