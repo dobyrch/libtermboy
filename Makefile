@@ -1,12 +1,27 @@
-CC=clang
-CFLAGS=-Wall
-LFLAGS=-lpthread -lpulse-simple
+CC = clang
+CFLAGS = -Wall -ansi -pedantic -fPIC
+LDFLAGS = -Lout
+LDLIBS = -lpthread -lpulse-simple -ltermboy
+OUT_DIR = out
+_OBJECTS = keyboard screen
 
-main: keyboard.o screen.o
-	$(CC) $(CFLAGS) $(LFLAGS) pong4.c keyboard.o -o pong
+OBJECTS = $(patsubst %,$(OUT_DIR)/%.o,$(_OBJECTS))
+LIBTERMBOY = $(OUT_DIR)/libtermboy.so
+EXAMPLE = $(OUT_DIR)/pong
 
-keyboard: keyboard.c keyboard.h
-	$(CC) $(CFLAGS) keyboard.c -c -o keyboard.o
+$(EXAMPLE): pong4.c $(LIBTERMBOY)
+	$(CC) $(LDFLAGS) $(LDLIBS) $< -o $@
 
-screen: screen.c screen.h
-	$(CC) $(CFLAGS) screen.c -c -o screen.o
+$(LIBTERMBOY): $(OBJECTS)
+	$(CC) -shared $^ -o $@
+
+$(OUT_DIR)/%.o: %.c %.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+.PHONY: run
+run: $(EXAMPLE)
+	LD_LIBRARY_PATH=$(OUT_DIR) $(EXAMPLE)
+
+.PHONY: clean
+clean:
+	rm -f out/*
