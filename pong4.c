@@ -55,9 +55,6 @@ int main(int argc, char *argv[])
 			NULL
 			);
 
-
-	keyboard_listen();
-
 	int freq_a = 50,
 	    freq_b = 45,
 	    freq_c = 84,
@@ -82,9 +79,7 @@ int main(int argc, char *argv[])
 	keyboard_register_release(K_F, cancel, NULL);
 	keyboard_register_release(K_G, cancel, NULL);
 
-	while (1) {
-		/* Main Loop */
-	}
+	keyboard_mainloop();
 
 	return EXIT_SUCCESS;
 }

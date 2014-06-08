@@ -62,6 +62,15 @@ void *keyboard_listen_helper(void *arg)
 	return NULL;
 }
 
+void keyboard_mainloop(void)
+{
+	/* TODO: Error handling */
+	pthread_t thread;
+
+	pthread_create(&thread, NULL, keyboard_listen_helper, NULL);
+	pthread_join(thread, NULL);
+}
+
 void keyboard_listen(void)
 {
 	/* TODO: Error handling */
