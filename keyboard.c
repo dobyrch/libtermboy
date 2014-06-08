@@ -4,12 +4,8 @@
 #include <unistd.h>
 #include <linux/kd.h>
 #include <sys/ioctl.h>
+#include "common.h"
 #include "keyboard.h"
-
-#define CHECK(retval) do {   \
-	if ((retval) == -1)  \
-		return -1;   \
-} while (0)
 
 #define K_RELEASE (1<<7)
 
