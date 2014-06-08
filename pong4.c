@@ -13,8 +13,33 @@
 
 #define BUFSIZE 100
 
-int main(int argc, char *argv[]) {
-	pa_simple *s;
+static uint8_t high[BUFSIZE] = {[0 ... 99] = 0xFF};
+static uint8_t low[BUFSIZE] = {[0 ... 99] = 0x00};
+static int cancelled;
+static pa_simple *s;
+
+void *tone(void *args)
+{
+	int bytes = *((int *)args);
+	cancelled = 0;
+
+	while (!cancelled) {
+		pa_simple_write(s, &high, bytes, NULL);
+		pa_simple_write(s, &low, bytes, NULL);
+	}
+
+	return NULL;
+}
+
+void *cancel(void *dummy)
+{
+	cancelled = 1;
+
+	return NULL;
+}
+
+int main(int argc, char *argv[])
+{
 	pa_sample_spec ss;
 	ss.format = PA_SAMPLE_U8;
 	ss.channels = 1;
@@ -30,43 +55,36 @@ int main(int argc, char *argv[]) {
 			NULL
 			);
 
-	uint8_t high[BUFSIZE] = {[0 ... 99] = 0xFF};
-	uint8_t low[BUFSIZE] = {[0 ... 99] = 0x00};
 
 	keyboard_listen();
 
-	do {
-		if (keyboard_pressed(K_A)) {
-			pa_simple_write(s, &high, 50, NULL);
-			pa_simple_write(s, &low, 50, NULL);
-		}
-		if (keyboard_pressed(K_B)) {
-			pa_simple_write(s, &high, 45, NULL);
-			pa_simple_write(s, &low, 45, NULL);
-		}
-		if (keyboard_pressed(K_C)) {
-			pa_simple_write(s, &high, 84, NULL);
-			pa_simple_write(s, &low, 84, NULL);
-		}
-		if (keyboard_pressed(K_D)) {
-			pa_simple_write(s, &high, 75, NULL);
-			pa_simple_write(s, &low, 75, NULL);
-		}
-		if (keyboard_pressed(K_E)) {
-			pa_simple_write(s, &high, 67, NULL);
-			pa_simple_write(s, &low, 67, NULL);
-		}
-		if (keyboard_pressed(K_F)) {
-			pa_simple_write(s, &high, 63, NULL);
-			pa_simple_write(s, &low, 63, NULL);
-		}
-		if (keyboard_pressed(K_G)) {
-			pa_simple_write(s, &high, 56, NULL);
-			pa_simple_write(s, &low, 56, NULL);
-		}
+	int freq_a = 50,
+	    freq_b = 45,
+	    freq_c = 84,
+	    freq_d = 75,
+	    freq_e = 67,
+	    freq_f = 63,
+	    freq_g = 56;
 
-	} while (!keyboard_pressed(1));
+	keyboard_register_press(K_A, tone, &freq_a);
+	keyboard_register_press(K_B, tone, &freq_b);
+	keyboard_register_press(K_C, tone, &freq_c);
+	keyboard_register_press(K_D, tone, &freq_d);
+	keyboard_register_press(K_E, tone, &freq_e);
+	keyboard_register_press(K_F, tone, &freq_f);
+	keyboard_register_press(K_G, tone, &freq_g);
 
+	keyboard_register_release(K_A, cancel, NULL);
+	keyboard_register_release(K_B, cancel, NULL);
+	keyboard_register_release(K_C, cancel, NULL);
+	keyboard_register_release(K_D, cancel, NULL);
+	keyboard_register_release(K_E, cancel, NULL);
+	keyboard_register_release(K_F, cancel, NULL);
+	keyboard_register_release(K_G, cancel, NULL);
+
+	while (1) {
+		/* Main Loop */
+	}
 
 	return EXIT_SUCCESS;
 }

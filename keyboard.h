@@ -11,6 +11,8 @@
 
 
 void keyboard_listen(void);
+void keyboard_register_press(int key, void *(*handler)(void *), void *args);
+void keyboard_register_release(int key, void *(*handler)(void *), void *args);
 int keyboard_pressed(int key);
 int keyboard_rawmode(void);
 int keyboard_restore(void);

@@ -11,37 +11,60 @@
 		return -1;   \
 } while (0)
 
-#define ESC 1
+#define K_RELEASE (1<<7)
 
 static struct termios tty_attr_orig;
 static int kbd_mode_orig;
 static int rawmode = 0;
+
 static int pressed[128] = {0};
+static void *(*press_handlers[128])(void *) = {NULL};
+static void *(*release_handlers[128])(void *) = {NULL};
+static void *press_args[128] = {NULL};
+static void *release_args[128] = {NULL};
 
 void *keyboard_listen_helper(void *arg)
 {
 	int key;
+	pthread_t thread;
+	pthread_attr_t attr;
+
+	pthread_attr_init(&attr);
+	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 
 	keyboard_rawmode();
 
 	do {
 		key = getchar();
 
-		if (key & 1<<7) {
-			key ^= 1<<7;
+		if (key & K_RELEASE) {
+			key ^= K_RELEASE;
+			if (release_handlers[key] && pressed[key] != 0) {
+				pthread_create(&thread, &attr,
+						release_handlers[key],
+						release_args[key]);
+			}
 			pressed[key] = 0;
 		} else {
+			if (press_handlers[key] && pressed[key] != 1) {
+				pthread_create(&thread, &attr,
+						press_handlers[key],
+						press_args[key]);
+			}
 			pressed[key] = 1;
 		}
-	} while (key != ESC);
+	} while (key != K_ESC);
 
 	keyboard_restore();
+
+	pthread_attr_destroy(&attr);
 
 	return NULL;
 }
 
 void keyboard_listen(void)
 {
+	/* TODO: Error handling */
 	pthread_t thread;
 	pthread_attr_t attr;
 
@@ -49,6 +72,18 @@ void keyboard_listen(void)
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 	pthread_create(&thread, &attr, keyboard_listen_helper, NULL);
 	pthread_attr_destroy(&attr);
+}
+
+void keyboard_register_press(int key, void *(*handler)(void *), void *args)
+{
+	press_handlers[key] = handler;
+	press_args[key] = args;
+}
+
+void keyboard_register_release(int key, void *(*handler)(void *), void *args)
+{
+	release_handlers[key] = handler;
+	release_args[key] = args;
 }
 
 int keyboard_pressed(int key)
