@@ -7,9 +7,9 @@ _OBJECTS = keyboard screen
 
 OBJECTS = $(patsubst %,$(OUT_DIR)/%.o,$(_OBJECTS))
 LIBTERMBOY = $(OUT_DIR)/libtermboy.so
-EXAMPLE = $(OUT_DIR)/pong
+EXAMPLE = $(OUT_DIR)/breakout
 
-$(EXAMPLE): pong4.c $(LIBTERMBOY)
+$(EXAMPLE): breakout.c $(LIBTERMBOY)
 	$(CC) $(LDFLAGS) $(LDLIBS) $< -o $@
 
 $(LIBTERMBOY): $(OBJECTS)

@@ -64,10 +64,6 @@ static int font_restore(void)
 	return 0;
 }
 
-int main(void) {
-	font_pixelmode();
-}
-
 /*
 Use ioctl PIO_CMAP to set term colors.
 See setvtrgb.c from the kbd project and
