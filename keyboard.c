@@ -131,5 +131,3 @@ int keyboard_restore(void)
 
 	return 0;
 }
-
-#undef CHECK
