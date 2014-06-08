@@ -9,9 +9,12 @@
 #define K_F   0x21
 #define K_G   0x22
 
+enum listen_mode {
+	KEYBOARD_BLOCKING,
+	KEYBOARD_NONBLOCKING
+};
 
-void keyboard_mainloop(void);
-void keyboard_listen(void);
+int keyboard_listen(enum listen_mode);
 void keyboard_register_press(int key, void *(*handler)(void *), void *args);
 void keyboard_register_release(int key, void *(*handler)(void *), void *args);
 int keyboard_pressed(int key);

@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
 	keyboard_register_release(K_F, cancel, NULL);
 	keyboard_register_release(K_G, cancel, NULL);
 
-	keyboard_mainloop();
+	keyboard_listen(KEYBOARD_BLOCKING);
 
 	return EXIT_SUCCESS;
 }

@@ -58,25 +58,25 @@ void *keyboard_listen_helper(void *arg)
 	return NULL;
 }
 
-void keyboard_mainloop(void)
+int keyboard_listen(enum listen_mode mode)
 {
-	/* TODO: Error handling */
-	pthread_t thread;
-
-	pthread_create(&thread, NULL, keyboard_listen_helper, NULL);
-	pthread_join(thread, NULL);
-}
-
-void keyboard_listen(void)
-{
-	/* TODO: Error handling */
 	pthread_t thread;
 	pthread_attr_t attr;
 
-	pthread_attr_init(&attr);
-	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-	pthread_create(&thread, &attr, keyboard_listen_helper, NULL);
-	pthread_attr_destroy(&attr);
+	/* TODO: Error handling */
+	if (mode == KEYBOARD_BLOCKING) {
+		pthread_create(&thread, NULL, keyboard_listen_helper, NULL);
+		pthread_join(thread, NULL);
+		return 0;
+	} else if (mode == KEYBOARD_NONBLOCKING) {
+		pthread_attr_init(&attr);
+		pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+		pthread_create(&thread, &attr, keyboard_listen_helper, NULL);
+		pthread_attr_destroy(&attr);
+		return 0;
+	}
+
+	return -1;
 }
 
 void keyboard_register_press(int key, void *(*handler)(void *), void *args)
