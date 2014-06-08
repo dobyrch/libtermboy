@@ -4,8 +4,8 @@
 #include <unistd.h>
 #include <linux/kd.h>
 #include <sys/stat.h>
-#include "common.h"
-#include "screen.h"
+#include "include/common.h"
+#include "include/screen.h"
 
 static struct console_font_op orig_font;
 /* TODO: reference kernel code that explains these magic numbers */

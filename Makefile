@@ -3,6 +3,7 @@ CFLAGS = -Wall -ansi -pedantic -fPIC
 LDFLAGS = -Lout
 LDLIBS = -lpthread -lpulse-simple -ltermboy
 OUT_DIR = out
+INCLUDE_DIR = include
 _OBJECTS = keyboard screen
 
 OBJECTS = $(patsubst %,$(OUT_DIR)/%.o,$(_OBJECTS))
@@ -15,7 +16,7 @@ $(EXAMPLE): breakout.c $(LIBTERMBOY)
 $(LIBTERMBOY): $(OBJECTS)
 	$(CC) -shared $^ -o $@
 
-$(OUT_DIR)/%.o: %.c %.h
+$(OUT_DIR)/%.o: %.c $(INCLUDE_DIR)/%.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 .PHONY: run
