@@ -11,7 +11,7 @@
 #include <pulse/error.h>
 #include "keyboard.h"
 
-#define BUFSIZE 50
+#define BUFSIZE 100
 
 int main(int argc, char *argv[]) {
 	pa_simple *s;
@@ -30,25 +30,43 @@ int main(int argc, char *argv[]) {
 			NULL
 			);
 
-	//for (uint8_t data = 0; data < 255; ++data) {
-	uint8_t sound1[BUFSIZE] = {[0 ... 49] = 0xE6};
-	uint8_t sound2[BUFSIZE] = {[0 ... 49] = 0x19};
-	//while (1) {
-		//printf("Writing %d\n", data);
-	//}
-	
+	uint8_t high[BUFSIZE] = {[0 ... 99] = 0xFF};
+	uint8_t low[BUFSIZE] = {[0 ... 99] = 0x00};
+
 	keyboard_listen();
 
 	do {
-		if (keyboard_pressed(0x50)) {
-			pa_simple_write(s, &sound1, BUFSIZE, NULL);
+		if (keyboard_pressed(K_A)) {
+			pa_simple_write(s, &high, 50, NULL);
+			pa_simple_write(s, &low, 50, NULL);
 		}
-		if (keyboard_pressed(0x50)) {
-			pa_simple_write(s, &sound2, BUFSIZE, NULL);
+		if (keyboard_pressed(K_B)) {
+			pa_simple_write(s, &high, 45, NULL);
+			pa_simple_write(s, &low, 45, NULL);
+		}
+		if (keyboard_pressed(K_C)) {
+			pa_simple_write(s, &high, 84, NULL);
+			pa_simple_write(s, &low, 84, NULL);
+		}
+		if (keyboard_pressed(K_D)) {
+			pa_simple_write(s, &high, 75, NULL);
+			pa_simple_write(s, &low, 75, NULL);
+		}
+		if (keyboard_pressed(K_E)) {
+			pa_simple_write(s, &high, 67, NULL);
+			pa_simple_write(s, &low, 67, NULL);
+		}
+		if (keyboard_pressed(K_F)) {
+			pa_simple_write(s, &high, 63, NULL);
+			pa_simple_write(s, &low, 63, NULL);
+		}
+		if (keyboard_pressed(K_G)) {
+			pa_simple_write(s, &high, 56, NULL);
+			pa_simple_write(s, &low, 56, NULL);
 		}
 
 	} while (!keyboard_pressed(1));
-	
+
 
 	return EXIT_SUCCESS;
 }
