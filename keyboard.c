@@ -9,54 +9,19 @@
 
 #define K_RELEASE (1<<7)
 
+static void *keyboard_listen_helper(void *arg);
+static int keyboard_rawmode(void);
+static int keyboard_restore(void);
+
 static struct termios tty_attr_orig;
 static int kbd_mode_orig;
 static int rawmode = 0;
 
 static int pressed[128] = {0};
-static void *(*press_handlers[128])(void *) = {NULL};
-static void *(*release_handlers[128])(void *) = {NULL};
-static void *press_args[128] = {NULL};
-static void *release_args[128] = {NULL};
-
-static void *keyboard_listen_helper(void *arg)
-{
-	int key;
-	pthread_t thread;
-	pthread_attr_t attr;
-
-	pthread_attr_init(&attr);
-	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-
-	keyboard_rawmode();
-
-	do {
-		key = getchar();
-
-		if (key & K_RELEASE) {
-			key ^= K_RELEASE;
-			if (release_handlers[key] && pressed[key] != 0) {
-				pthread_create(&thread, &attr,
-						release_handlers[key],
-						release_args[key]);
-			}
-			pressed[key] = 0;
-		} else {
-			if (press_handlers[key] && pressed[key] != 1) {
-				pthread_create(&thread, &attr,
-						press_handlers[key],
-						press_args[key]);
-			}
-			pressed[key] = 1;
-		}
-	} while (key != K_ESC);
-
-	keyboard_restore();
-
-	pthread_attr_destroy(&attr);
-
-	return NULL;
-}
+static void *(*press_handlers[128])(void *);
+static void *(*release_handlers[128])(void *);
+static void *press_args[128];
+static void *release_args[128];
 
 int keyboard_listen(enum listen_mode mode)
 {
@@ -99,7 +64,46 @@ int keyboard_pressed(int key)
 		return -1;
 }
 
-int keyboard_rawmode(void)
+static void *keyboard_listen_helper(void *arg)
+{
+	int key;
+	pthread_t thread;
+	pthread_attr_t attr;
+
+	pthread_attr_init(&attr);
+	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+
+	keyboard_rawmode();
+
+	do {
+		key = getchar();
+
+		if (key & K_RELEASE) {
+			key ^= K_RELEASE;
+			if (release_handlers[key] && pressed[key] != 0) {
+				pthread_create(&thread, &attr,
+						release_handlers[key],
+						release_args[key]);
+			}
+			pressed[key] = 0;
+		} else {
+			if (press_handlers[key] && pressed[key] != 1) {
+				pthread_create(&thread, &attr,
+						press_handlers[key],
+						press_args[key]);
+			}
+			pressed[key] = 1;
+		}
+	} while (key != K_ESC);
+
+	keyboard_restore();
+
+	pthread_attr_destroy(&attr);
+
+	return NULL;
+}
+
+static int keyboard_rawmode(void)
 {
 	struct termios tty_attr;
 
@@ -118,7 +122,7 @@ int keyboard_rawmode(void)
 	return 0;
 }
 
-int keyboard_restore(void)
+static int keyboard_restore(void)
 {
 	if (rawmode) {
 		CHECK(tcsetattr(STDIN_FILENO, TCSAFLUSH, &tty_attr_orig));
