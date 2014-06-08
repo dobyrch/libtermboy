@@ -1,4 +1,5 @@
 #include <fcntl.h>
+#include <string.h>
 #include <stropts.h>
 #include <unistd.h>
 #include <linux/kd.h>
@@ -9,50 +10,62 @@
 static struct console_font_op orig_font;
 /* TODO: reference kernel code that explains these magic numbers */
 static unsigned char orig_font_data[1024 * 32 * 4];
+static int pixelmode = 0;
 
-static int set_font_height(void)
+static int font_pixelmode(void)
 {
 	struct console_font_op new_font;
+	unsigned char new_font_data[256 * 32 * 1];
 	int fd;
+
+	if (pixelmode)
+		return 0;
 
 	CHECK(fd = open("/dev/tty", O_RDONLY));
 
-        orig_font.op = KD_FONT_OP_GET;
-        orig_font.flags = 0;
-        orig_font.width = orig_font.height = 32;
-        orig_font.charcount = 1024;
-        orig_font.data = orig_font_data;
-        CHECK(ioctl(fd, KDFONTOP, &orig_font));
+	orig_font.op = KD_FONT_OP_GET;
+	orig_font.flags = 0;
+	orig_font.width = orig_font.height = 32;
+	orig_font.charcount = 1024;
+	orig_font.data = orig_font_data;
+	CHECK(ioctl(fd, KDFONTOP, &orig_font));
 
-        new_font.op = KD_FONT_OP_SET;
-        new_font.flags = 0;
-        new_font.width = orig_font.width;
-        new_font.height = 4;
-        new_font.charcount = orig_font.charcount;
-	/* TODO: modify font data to display half block independent of font */
-        new_font.data = orig_font_data;
-        CHECK(ioctl(fd, KDFONTOP, &new_font));
+	/*
+	TODO: Create an 8x8 charset
+	use uppercase for top half, lowercase for bottom half
+	*/
+	memset(new_font_data + 0x540, 0xF0, 32);
+	new_font.op = KD_FONT_OP_SET;
+	new_font.flags = 0;
+	new_font.width = 8;
+	new_font.height = 4;
+	new_font.charcount = 256;
+	new_font.data = new_font_data;
+	CHECK(ioctl(fd, KDFONTOP, &new_font));
 
 	CHECK(close(fd));
+
+	pixelmode = 1;
 	return 0;
 }
 
-static int restore_font_height(void)
+static int font_restore(void)
 {
 	int fd;
 
-	CHECK(fd = open("/dev/tty", O_RDONLY));
+	if (pixelmode) {
+		CHECK(fd = open("/dev/tty", O_RDONLY));
+		orig_font.op = KD_FONT_OP_SET;
+		CHECK(ioctl(fd, KDFONTOP, &orig_font));
+		CHECK(close(fd));
+		pixelmode = 0;
+	}
 
-        orig_font.op = KD_FONT_OP_SET;
-        CHECK(ioctl(fd, KDFONTOP, &orig_font));
-
-	CHECK(close(fd));
 	return 0;
 }
 
 int main(void) {
-	set_font_height();
-	restore_font_height();
+	font_pixelmode();
 }
 
 /*

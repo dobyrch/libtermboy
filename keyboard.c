@@ -19,7 +19,7 @@ static void *(*release_handlers[128])(void *) = {NULL};
 static void *press_args[128] = {NULL};
 static void *release_args[128] = {NULL};
 
-void *keyboard_listen_helper(void *arg)
+static void *keyboard_listen_helper(void *arg)
 {
 	int key;
 	pthread_t thread;
@@ -123,6 +123,7 @@ int keyboard_restore(void)
 	if (rawmode) {
 		CHECK(tcsetattr(STDIN_FILENO, TCSAFLUSH, &tty_attr_orig));
 		CHECK(ioctl(STDIN_FILENO, KDSKBMODE, kbd_mode_orig));
+		rawmode = 0;
 	}
 
 	return 0;
