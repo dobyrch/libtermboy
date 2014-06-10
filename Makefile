@@ -1,9 +1,9 @@
 CC = clang
-CFLAGS = -Wall -ansi -pedantic -fPIC
-LDFLAGS = -Lout
-LDLIBS = -lpthread -lpulse-simple -ltermboy
-OUT_DIR = out
 INCLUDE_DIR = include
+OUT_DIR = out
+CFLAGS = -I$(INCLUDE_DIR) -Wall -O2 -fPIC -ansi -pedantic
+LDFLAGS = -L$(OUT_DIR)
+LDLIBS = -lpthread -lpulse-simple -ltermboy
 _OBJECTS = keyboard screen
 
 OBJECTS = $(patsubst %,$(OUT_DIR)/%.o,$(_OBJECTS))
@@ -11,12 +11,12 @@ LIBTERMBOY = $(OUT_DIR)/libtermboy.so
 EXAMPLE = $(OUT_DIR)/breakout
 
 $(EXAMPLE): breakout.c $(LIBTERMBOY)
-	$(CC) $(LDFLAGS) $(LDLIBS) $< -o $@
+	$(CC) $(CFLAGS) $(LDFLAGS) $(LDLIBS) $< -o $@
 
 $(LIBTERMBOY): $(OBJECTS)
 	$(CC) -shared $^ -o $@
 
-$(OUT_DIR)/%.o: %.c $(INCLUDE_DIR)/%.h
+$(OUT_DIR)/%.o: %.c $(INCLUDE_DIR)/%.h $(INCLUDE_DIR)/common.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 .PHONY: run

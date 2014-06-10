@@ -4,8 +4,8 @@
 #include <unistd.h>
 #include <linux/kd.h>
 #include <sys/ioctl.h>
-#include "include/common.h"
-#include "include/keyboard.h"
+#include "common.h"
+#include "keyboard.h"
 
 #define K_RELEASE (1<<7)
 

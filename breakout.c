@@ -1,8 +1,8 @@
 #include <stdio.h>
-#include "include/screen.h"
+#include "screen.h"
 
 int main(void) {
-	screen_pixelmode(9);
+	screen_pixelmode(8);
 	screen_put(0, 1, RED);
 	screen_put(1, 1, YELLOW);
 	screen_put(2, 1, GREEN);
