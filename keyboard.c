@@ -17,11 +17,14 @@ static struct termios tty_attr_orig;
 static int kbd_mode_orig;
 static int rawmode = 0;
 
-static int pressed[128] = {0};
+static int pressed[128];
 static void *(*press_handlers[128])(void *);
 static void *(*release_handlers[128])(void *);
+static void *(*hold_handlers[128])(void *);
 static void *press_args[128];
 static void *release_args[128];
+static void *hold_args[128];
+static pthread_t hold_threads[128];
 
 int keyboard_listen(enum listen_mode mode)
 {
@@ -56,12 +59,30 @@ void keyboard_register_release(int key, void *(*handler)(void *), void *args)
 	release_args[key] = args;
 }
 
+void keyboard_register_hold(int key, void *(*handler)(void *), void *args)
+{
+	hold_handlers[key] = handler;
+	hold_args[key] = args;
+}
+
 int keyboard_pressed(int key)
 {
 	if (key >= 0 && key < 128)
 		return pressed[key];
 	else
 		return -1;
+}
+
+static void *repeat(void *key)
+{
+	int k = *(int *)key;
+	void *(*handler)(void *) = hold_handlers[k];
+	void *args = hold_args[k];
+
+	while (1) {
+		handler(args);
+	}
+
 }
 
 static void *keyboard_listen_helper(void *arg)
@@ -80,17 +101,29 @@ static void *keyboard_listen_helper(void *arg)
 
 		if (key & K_RELEASE) {
 			key ^= K_RELEASE;
-			if (release_handlers[key] && pressed[key] != 0) {
+			if (pressed[key] == 0)
+				continue;
+			if (release_handlers[key]) {
 				pthread_create(&thread, &attr,
 						release_handlers[key],
 						release_args[key]);
 			}
+			if (hold_handlers[key]) {
+				pthread_cancel(hold_threads[key]);
+			}
 			pressed[key] = 0;
 		} else {
-			if (press_handlers[key] && pressed[key] != 1) {
+			if (pressed[key] == 1)
+				continue;
+			if (press_handlers[key]) {
 				pthread_create(&thread, &attr,
 						press_handlers[key],
 						press_args[key]);
+			}
+			if (hold_handlers[key]) {
+				pthread_create(&hold_threads[key], NULL,
+						repeat,
+						&fixed_ints[key]);
 			}
 			pressed[key] = 1;
 		}

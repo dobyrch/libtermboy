@@ -21,4 +21,5 @@ enum listen_mode {
 int keyboard_listen(enum listen_mode);
 void keyboard_register_press(int key, void *(*handler)(void *), void *args);
 void keyboard_register_release(int key, void *(*handler)(void *), void *args);
+void keyboard_register_hold(int key, void *(*handler)(void *), void *args);
 int keyboard_pressed(int key);

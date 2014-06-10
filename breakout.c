@@ -1,19 +1,47 @@
 #include <stdio.h>
+#include <unistd.h>
+#include "keyboard.h"
 #include "screen.h"
 
+struct point {
+	int x;
+	int y;
+};
+
+struct point p;
+
+void *move(void *delta) {
+	struct point *d = delta;
+
+	screen_put(p.x, p.y, BLACK);
+	p.x += d->x;
+	p.y += d->y;
+	screen_put(p.x, p.y, MAGENTA|BOLD);
+	fflush(stdout);
+
+	usleep(50000);
+
+	return NULL;
+}
+
 int main(void) {
+	struct point up, down, left, right;
+	p.x = 10; p.y = 10;
+	up.x = 0; up.y = -1;
+	down.x = 0; down.y = 1;
+	left.x = -1; left.y = 0;
+	right.x = 1; right.y = 0;
+
 	screen_pixelmode(8);
-	screen_put(0, 1, RED);
-	screen_put(1, 1, YELLOW);
-	screen_put(2, 1, GREEN);
-	screen_put(3, 1, CYAN);
-	screen_put(4, 1, BLUE);
-	screen_put(5, 1, MAGENTA);
-	screen_put(0, 2, RED | BOLD);
-	screen_put(1, 2, YELLOW | BOLD);
-	screen_put(2, 2, GREEN | BOLD);
-	screen_put(3, 2, CYAN | BOLD);
-	screen_put(4, 2, BLUE | BOLD);
-	screen_put(5, 2, MAGENTA | BOLD);
-	printf("\n");
+	screen_put(p.x, p.y, MAGENTA|BOLD);
+
+	keyboard_register_hold(K_UP, move, &up);
+	keyboard_register_hold(K_DOWN, move, &down);
+	keyboard_register_hold(K_LEFT, move, &left);
+	keyboard_register_hold(K_RIGHT, move, &right);
+
+	keyboard_listen(KEYBOARD_BLOCKING);
+	screen_restore();
+
+	return 0;
 }
