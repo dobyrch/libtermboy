@@ -12,4 +12,6 @@ enum color {
 	BOLD
 };
 
+int screen_pixelmode(int pixel_size);
+int screen_restore(void);
 int screen_put(int x, int y, enum color c);
