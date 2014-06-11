@@ -22,7 +22,7 @@ int screen_pixelmode(int pixel_size)
 	unsigned char new_font_data[256 * 32 * 1];
 	int fd;
 
-	if (pixel_size < 1 || pixel_size > 32)
+	if (pixel_size < 1 || pixel_size > 8)
 		return -1;
 
 	CHECK(fd = open("/dev/tty", O_RDONLY));

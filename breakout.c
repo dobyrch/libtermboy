@@ -33,6 +33,8 @@ int main(void) {
 	right.x = 1; right.y = 0;
 
 	screen_pixelmode(8);
+	printf("\e[2J"); /* Clear screen */
+	printf("\e[?25l"); /* Hide cursor */
 	screen_put(p.x, p.y, MAGENTA|BOLD);
 
 	keyboard_register_hold(K_UP, move, &up);
