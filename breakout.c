@@ -25,6 +25,7 @@ void *move(void *delta) {
 }
 
 int main(void) {
+	int x_max, y_max;
 	struct point up, down, left, right;
 	p.x = 10; p.y = 10;
 	up.x = 0; up.y = -1;
@@ -33,8 +34,9 @@ int main(void) {
 	right.x = 1; right.y = 0;
 
 	screen_pixelmode(8);
-	printf("\e[2J"); /* Clear screen */
-	printf("\e[?25l"); /* Hide cursor */
+	screen_getwinsize(&x_max, &y_max);
+	printf("\x1B[2J"); /* Clear screen */
+	printf("\x1B[?25l"); /* Hide cursor */
 	screen_put(p.x, p.y, MAGENTA|BOLD);
 
 	keyboard_register_hold(K_UP, move, &up);
@@ -44,6 +46,8 @@ int main(void) {
 
 	keyboard_listen(KEYBOARD_BLOCKING);
 	screen_restore();
+	printf("\x1B[2J");
+	printf("Screen dimensions: %d x %d\n", x_max, y_max);
 
 	return 0;
 }

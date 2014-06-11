@@ -4,6 +4,7 @@
 #include <stropts.h>
 #include <unistd.h>
 #include <linux/kd.h>
+#include <sys/ioctl.h>
 #include <sys/stat.h>
 #include "common.h"
 #include "screen.h"
@@ -25,6 +26,7 @@ int screen_pixelmode(int pixel_size)
 	if (pixel_size < 1 || pixel_size > 8)
 		return -1;
 
+	/* TODO: Keep fd until call to screen_restore? */
 	CHECK(fd = open("/dev/tty", O_RDONLY));
 
 	if (!pixelmode) {
@@ -78,14 +80,28 @@ See setvtrgb.c from the kbd project and
 `man console_ioctl` for more info.
 */
 
+int screen_getwinsize(int *x, int*y)
+{
+	int fd;
+	struct winsize ws;
+
+	CHECK(fd = open("/dev/tty", O_RDONLY));
+	CHECK(ioctl(fd, TIOCGWINSZ, &ws));
+	*x = ws.ws_col;
+	*y = ws.ws_row;
+
+	return 0;
+}
+
 int screen_put(int x, int y, enum color c)
 {
 	if (color_map[x][y] != c) {
-		printf("\e[%d;%df", y+1, x+1);
+		/* TODO: Make separate function for printing CSI code(s) */
+		printf("\x1B[%d;%df", y+1, x+1);
 		if (c & BOLD)
-			printf("\e[1;3%dm*", c^BOLD);
+			printf("\x1B[1;3%dm*", c^BOLD);
 		else
-			printf("\e[0;3%dm*", c);
+			printf("\x1B[0;3%dm*", c);
 
 		color_map[x][y] = c;
 	}
