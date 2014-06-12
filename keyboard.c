@@ -59,6 +59,10 @@ void keyboard_register_release(int key, void *(*handler)(void *), void *args)
 	release_args[key] = args;
 }
 
+/*
+TODO: Add parameter for interval
+So user doesn't have to bother with creating struct for nanosleep
+*/
 void keyboard_register_hold(int key, void *(*handler)(void *), void *args)
 {
 	hold_handlers[key] = handler;

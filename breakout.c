@@ -3,48 +3,66 @@
 #include "keyboard.h"
 #include "screen.h"
 
-struct point {
+struct position {
 	int x;
 	int y;
 };
 
-struct point p;
+struct position paddle_pos, ball_pos;
 
-void *move(void *delta) {
-	struct point *d = delta;
+void *move_paddle(void *delta)
+{
+	int *d = delta;
 
-	screen_put(p.x, p.y, BLACK);
-	p.x += d->x;
-	p.y += d->y;
-	screen_put(p.x, p.y, MAGENTA|BOLD);
-	fflush(stdout);
+	paddle_pos.x += *d;
 
-	usleep(50000);
+	usleep(20000);
 
 	return NULL;
 }
 
+void draw_paddle(void)
+{
+	int i, x, y;
+
+	x = paddle_pos.x;
+	y = paddle_pos.y;
+	screen_put(x-6, y, BLACK);
+	screen_put(x-5, y, BLACK);
+	for (i = x-4; i <= x+4; ++i) {
+		screen_put(i, y, MAGENTA);
+	}
+	screen_put(x+5, y, BLACK);
+	screen_put(x+6, y, BLACK);
+	fflush(stdout);
+}
+
 int main(void) {
-	int x_max, y_max;
-	struct point up, down, left, right;
-	p.x = 10; p.y = 10;
-	up.x = 0; up.y = -1;
-	down.x = 0; down.y = 1;
-	left.x = -1; left.y = 0;
-	right.x = 1; right.y = 0;
+	int x_max, y_max, left, right;
+	left = -1; right = 1;
 
 	screen_pixelmode(8);
 	screen_getwinsize(&x_max, &y_max);
 	printf("\x1B[2J"); /* Clear screen */
 	printf("\x1B[?25l"); /* Hide cursor */
-	screen_put(p.x, p.y, MAGENTA|BOLD);
 
-	keyboard_register_hold(K_UP, move, &up);
-	keyboard_register_hold(K_DOWN, move, &down);
-	keyboard_register_hold(K_LEFT, move, &left);
-	keyboard_register_hold(K_RIGHT, move, &right);
+	keyboard_register_hold(K_LEFT, move_paddle, &left);
+	keyboard_register_hold(K_RIGHT, move_paddle, &right);
+	keyboard_listen(KEYBOARD_NONBLOCKING);
 
-	keyboard_listen(KEYBOARD_BLOCKING);
+	paddle_pos.x = x_max/2;
+	paddle_pos.y = y_max - 20;
+
+	while (!keyboard_pressed(K_ESC)) {
+
+		/* TODO: Mechanism for repeating function at given interval */
+		draw_paddle();
+		/* TODO: Sprite class for testing collisions */
+		/* draw_ball(); */
+		usleep(20000);
+
+	}
+
 	screen_restore();
 	printf("\x1B[2J");
 	printf("Screen dimensions: %d x %d\n", x_max, y_max);

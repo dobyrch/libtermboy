@@ -14,6 +14,11 @@ static struct console_font_op orig_font;
 static unsigned char orig_font_data[1024 * 32 * 4];
 static int pixelmode = 0;
 
+/*
+TODO: dynamically allocate map in screen_pixelmode and
+save window dimensions for later calls to screen_getwinsize
+TODO: move color map into sprite class
+*/
 static unsigned char color_map[1920/4][1080/4];
 
 /* TODO: pass in pixel size */
