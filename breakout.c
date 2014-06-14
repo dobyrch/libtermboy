@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include "common.h"
 #include "termboy.h"
 
 static struct tb_sprite paddle;
@@ -28,7 +29,7 @@ int main(void) {
 
 	printf("\x1B[2J"); /* Clear screen */
 	printf("\x1B[?25l"); /* Hide cursor */
-	screen_pixelmode(8);
+	tb_screen_init(8);
 
 	bg = tb_sprite_background();
 	for (i = 0; i < bg->width * bg->height; ++i)
@@ -36,7 +37,7 @@ int main(void) {
 
 	tb_sprite_init(&paddle, 6, 6);
 	for (i = 0; i < 6*6; ++i)
-		paddle.colors[i] = BLACK;
+		paddle.colors[i] = TB_COLOR_BLACK;
 
 	paddle.x = 50;
 	paddle.y = 50;
@@ -44,13 +45,13 @@ int main(void) {
 	tb_sprite_add(&paddle);
 	tb_sprite_redraw();
 
-	keyboard_register_hold(K_LEFT, move_paddle, &left);
-	keyboard_register_hold(K_RIGHT, move_paddle, &right);
-	keyboard_register_hold(K_UP, move_paddle, &up);
-	keyboard_register_hold(K_DOWN, move_paddle, &down);
-	keyboard_listen(KEYBOARD_BLOCKING);
+	tb_key_handle_hold(TB_KEY_LEFT, move_paddle, &left);
+	tb_key_handle_hold(TB_KEY_RIGHT, move_paddle, &right);
+	tb_key_handle_hold(TB_KEY_UP, move_paddle, &up);
+	tb_key_handle_hold(TB_KEY_DOWN, move_paddle, &down);
+	tb_key_listen(TB_LISTEN_BLOCKING);
 
-	screen_restore();
+	tb_screen_restore();
 	printf("\x1B[2J\n");
 
 	return EXIT_SUCCESS;

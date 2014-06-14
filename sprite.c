@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "common.h"
 #include "termboy.h"
 
 #define SPRITES(x, y) (sprites[(y)*(background.width) + (x)])
@@ -26,7 +27,7 @@ int tb_sprite_init(struct tb_sprite *sprite, int width, int height)
 	sprite->width = width;
 	sprite->height = height;
 	sprite->layer = 0;
-	sprite->colors = calloc(sizeof(enum color), width * height);
+	sprite->colors = calloc(sizeof(enum tb_color), width * height);
 
 	return 0;
 }
@@ -39,14 +40,14 @@ in order to prevent the user from modifying the other attributes
 struct tb_sprite *tb_sprite_background(void)
 {
 	int width, height;
-	screen_getwinsize(&width, &height);
+	tb_screen_size(&width, &height);
 
 	background.x = 0;
 	background.y = 0;
 	background.width = width;
 	background.height = height;
 	background.layer = -1;
-	background.colors = calloc(sizeof(enum color), width * height);
+	background.colors = calloc(sizeof(enum tb_color), width * height);
 	sprites = calloc(sizeof(struct sprite_listnote *), width * height);
 
 	return &background;
@@ -127,16 +128,17 @@ static int redraw(int x, int y, int width, int height)
 		for (j = y; j < y+height; ++j) {
 			list = SPRITES(i, j);
 			if (list == NULL) {
-				screen_put(i, j, COLOR(background, i, j));
+				tb_screen_put(i, j, COLOR(background, i, j));
 			} else {
+				/* TODO: Why can't this be dereferenced in the macro? */
 				top_layer = *list->sprite;
-				screen_put(i, j, COLOR(top_layer,
+				tb_screen_put(i, j, COLOR(top_layer,
 						 i - top_layer.x,
 						 j - top_layer.y));
 			}
 		}
 	}
-	screen_flush();
+	tb_screen_flush();
 
 	return 0;
 }

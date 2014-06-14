@@ -6,6 +6,7 @@
 #include <linux/kd.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
+#include "common.h"
 #include "termboy.h"
 
 static struct console_font_op orig_font;
@@ -20,7 +21,7 @@ save window dimensions for later calls to screen_getwinsize
 static unsigned char color_map[1920][1080];
 
 /* TODO: pass in pixel size */
-int screen_pixelmode(int pixel_size)
+int tb_screen_init(int pixel_size)
 {
 	struct console_font_op new_font;
 	unsigned char new_font_data[256 * 32 * 1];
@@ -62,7 +63,7 @@ int screen_pixelmode(int pixel_size)
 	return 0;
 }
 
-int screen_restore(void)
+int tb_screen_restore(void)
 {
 	int fd;
 
@@ -83,7 +84,7 @@ See setvtrgb.c from the kbd project and
 `man console_ioctl` for more info.
 */
 
-int screen_getwinsize(int *width, int*height)
+int tb_screen_size(int *width, int*height)
 {
 	int fd;
 	struct winsize ws;
@@ -96,23 +97,23 @@ int screen_getwinsize(int *width, int*height)
 	return 0;
 }
 
-int screen_put(int x, int y, enum color c)
+int tb_screen_put(int x, int y, enum tb_color color)
 {
-	if (color_map[x][y] != c) {
+	if (color_map[x][y] != color) {
 		/* TODO: Make separate function for printing CSI code(s) */
 		printf("\x1B[%d;%df", y+1, x+1);
-		if (c & BOLD)
-			printf("\x1B[1;3%dm*", c^BOLD);
+		if (color & BOLD)
+			printf("\x1B[1;3%dm*", color^BOLD);
 		else
-			printf("\x1B[0;3%dm*", c);
+			printf("\x1B[0;3%dm*", color);
 
-		color_map[x][y] = c;
+		color_map[x][y] = color;
 	}
 
 	return 0;
 }
 
-int screen_flush(void)
+int tb_screen_flush(void)
 {
 	fflush(stdout);
 	return 0;
