@@ -17,9 +17,8 @@ static int pixelmode = 0;
 /*
 TODO: dynamically allocate map in screen_pixelmode and
 save window dimensions for later calls to screen_getwinsize
-TODO: move color map into sprite class
 */
-static unsigned char color_map[1920/4][1080/4];
+static unsigned char color_map[1920][1080];
 
 /* TODO: pass in pixel size */
 int screen_pixelmode(int pixel_size)
@@ -85,15 +84,15 @@ See setvtrgb.c from the kbd project and
 `man console_ioctl` for more info.
 */
 
-int screen_getwinsize(int *x, int*y)
+int screen_getwinsize(int *width, int*height)
 {
 	int fd;
 	struct winsize ws;
 
 	CHECK(fd = open("/dev/tty", O_RDONLY));
 	CHECK(ioctl(fd, TIOCGWINSZ, &ws));
-	*x = ws.ws_col;
-	*y = ws.ws_row;
+	*width = ws.ws_col;
+	*height = ws.ws_row;
 
 	return 0;
 }
@@ -111,5 +110,11 @@ int screen_put(int x, int y, enum color c)
 		color_map[x][y] = c;
 	}
 
+	return 0;
+}
+
+int screen_flush(void)
+{
+	fflush(stdout);
 	return 0;
 }

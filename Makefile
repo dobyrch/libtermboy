@@ -1,10 +1,10 @@
 CC = clang
 INCLUDE_DIR = include
 OUT_DIR = out
-CFLAGS = -I$(INCLUDE_DIR) -Wall -O2 -fPIC -ansi -pedantic
+CFLAGS = -I$(INCLUDE_DIR) -Wall -fPIC -ansi -pedantic -g
 LDFLAGS = -L$(OUT_DIR)
 LDLIBS = -lpthread -lpulse-simple -ltermboy
-_OBJECTS = keyboard screen
+_OBJECTS = keyboard screen sprite
 
 OBJECTS = $(patsubst %,$(OUT_DIR)/%.o,$(_OBJECTS))
 LIBTERMBOY = $(OUT_DIR)/libtermboy.so

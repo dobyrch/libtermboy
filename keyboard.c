@@ -87,6 +87,7 @@ static void *repeat(void *key)
 		handler(args);
 	}
 
+	return NULL;
 }
 
 static void *keyboard_listen_helper(void *arg)
