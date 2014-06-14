@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "screen.h"
-#include "sprite.h"
+#include "termboy.h"
 
 #define SPRITES(x, y) (sprites[(y)*(background.width) + (x)])
 #define COLOR(sprite, x, y) ((sprite).colors[(y)*(sprite.width) + (x)])

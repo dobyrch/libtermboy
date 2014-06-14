@@ -1,9 +1,8 @@
 CC = clang
-INCLUDE_DIR = include
 OUT_DIR = out
-CFLAGS = -I$(INCLUDE_DIR) -Wall -fPIC -ansi -pedantic -g
+CFLAGS = -Wall -fPIC -ansi -pedantic -g
 LDFLAGS = -L$(OUT_DIR)
-LDLIBS = -lpthread -lpulse-simple -ltermboy
+LDLIBS = -lpthread -ltermboy
 _OBJECTS = keyboard screen sprite
 
 OBJECTS = $(patsubst %,$(OUT_DIR)/%.o,$(_OBJECTS))
@@ -16,7 +15,7 @@ $(EXAMPLE): breakout.c $(LIBTERMBOY)
 $(LIBTERMBOY): $(OBJECTS)
 	$(CC) -shared $^ -o $@
 
-$(OUT_DIR)/%.o: %.c $(INCLUDE_DIR)/%.h $(INCLUDE_DIR)/common.h
+$(OUT_DIR)/%.o: %.c termboy.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 .PHONY: run

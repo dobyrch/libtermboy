@@ -1,9 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "keyboard.h"
-#include "screen.h"
-#include "sprite.h"
+#include "termboy.h"
 
 static struct tb_sprite paddle;
 struct pos {

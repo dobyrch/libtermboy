@@ -4,8 +4,7 @@
 #include <unistd.h>
 #include <linux/kd.h>
 #include <sys/ioctl.h>
-#include "common.h"
-#include "keyboard.h"
+#include "termboy.h"
 
 #define K_RELEASE (1<<7)
 
@@ -47,6 +46,14 @@ int keyboard_listen(enum listen_mode mode)
 	return -1;
 }
 
+int keyboard_pressed(int key)
+{
+	if (key >= 0 && key < 128)
+		return pressed[key];
+	else
+		return -1;
+}
+
 void keyboard_register_press(int key, void *(*handler)(void *), void *args)
 {
 	press_handlers[key] = handler;
@@ -67,14 +74,6 @@ void keyboard_register_hold(int key, void *(*handler)(void *), void *args)
 {
 	hold_handlers[key] = handler;
 	hold_args[key] = args;
-}
-
-int keyboard_pressed(int key)
-{
-	if (key >= 0 && key < 128)
-		return pressed[key];
-	else
-		return -1;
 }
 
 static void *repeat(void *key)

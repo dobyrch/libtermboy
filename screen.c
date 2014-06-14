@@ -6,8 +6,7 @@
 #include <linux/kd.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
-#include "common.h"
-#include "screen.h"
+#include "termboy.h"
 
 static struct console_font_op orig_font;
 /* TODO: reference kernel code that explains these magic numbers */
