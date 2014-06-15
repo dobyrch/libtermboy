@@ -20,7 +20,7 @@ void *move_paddle(void *delta)
 
 int main(void) {
 	int i;
-	struct tb_sprite *bg;
+	struct tb_sprite *bg, thing1, thing2;
 	struct pos up, down, left, right;
 	left.x  = -1; left.y  =  0;
 	right.x =  1; right.y =  0;
@@ -38,11 +38,27 @@ int main(void) {
 	tb_sprite_init(&paddle, 6, 6);
 	for (i = 0; i < 6*6; ++i)
 		paddle.colors[i] = TB_COLOR_BLACK;
-
 	paddle.x = 50;
 	paddle.y = 50;
+	paddle.layer = 2;
 
+	tb_sprite_init(&thing1, 20, 13);
+	for (i = 0; i < 20*13; ++i)
+		thing1.colors[i] = TB_COLOR_RED;
+	thing1.x = 30;
+	thing1.y = 5;
+	thing1.layer = 3;
+
+	tb_sprite_init(&thing2, 16, 18);
+	for (i = 0; i < 16*18; ++i)
+		thing2.colors[i] = TB_COLOR_GREEN;
+	thing2.x = 10;
+	thing2.y = 60;
+	thing2.layer = 1;
+
+	tb_sprite_add(&thing1);
 	tb_sprite_add(&paddle);
+	tb_sprite_add(&thing2);
 	tb_sprite_redraw();
 
 	tb_key_handle_hold(TB_KEY_LEFT, move_paddle, &left);

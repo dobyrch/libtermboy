@@ -7,9 +7,9 @@ _OBJECTS = keyboard screen sprite
 
 OBJECTS = $(patsubst %,$(OUT_DIR)/%.o,$(_OBJECTS))
 LIBTERMBOY = $(OUT_DIR)/libtermboy.so
-EXAMPLE = $(OUT_DIR)/breakout
+DEMO = $(OUT_DIR)/demo
 
-$(EXAMPLE): breakout.c $(LIBTERMBOY)
+$(DEMO): demo.c $(LIBTERMBOY)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(LDLIBS) $< -o $@
 
 $(LIBTERMBOY): $(OBJECTS)
@@ -19,8 +19,8 @@ $(OUT_DIR)/%.o: %.c termboy.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 .PHONY: run
-run: $(EXAMPLE)
-	LD_LIBRARY_PATH=$(OUT_DIR) $(EXAMPLE)
+run: $(DEMO)
+	LD_LIBRARY_PATH=$(OUT_DIR) $(DEMO)
 
 .PHONY: clean
 clean:
