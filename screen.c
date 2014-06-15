@@ -1,4 +1,5 @@
 #include <fcntl.h>
+#include <pthread.h>
 #include <stdio.h>
 #include <string.h>
 #include <stropts.h>
@@ -19,6 +20,7 @@ TODO: dynamically allocate map in screen_pixelmode and
 save window dimensions for later calls to screen_getwinsize
 */
 static unsigned char color_map[1920][1080];
+static pthread_mutex_t print_lock = PTHREAD_MUTEX_INITIALIZER;
 
 /* TODO: pass in pixel size */
 int tb_screen_init(int pixel_size)
@@ -99,6 +101,7 @@ int tb_screen_size(int *width, int*height)
 
 int tb_screen_put(int x, int y, enum tb_color color)
 {
+	pthread_mutex_lock(&print_lock);
 	if (color_map[x][y] != color) {
 		/* TODO: Make separate function for printing CSI code(s) */
 		printf("\x1B[%d;%df", y+1, x+1);
@@ -110,6 +113,7 @@ int tb_screen_put(int x, int y, enum tb_color color)
 		color_map[x][y] = color;
 	}
 
+	pthread_mutex_unlock(&print_lock);
 	return 0;
 }
 

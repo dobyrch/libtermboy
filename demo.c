@@ -56,8 +56,8 @@ int main(void) {
 	thing2.y = 60;
 	thing2.layer = 1;
 
-	tb_sprite_add(&thing1);
 	tb_sprite_add(&paddle);
+	tb_sprite_add(&thing1);
 	tb_sprite_add(&thing2);
 	tb_sprite_redraw();
 

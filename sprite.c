@@ -1,3 +1,4 @@
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "common.h"
@@ -18,6 +19,8 @@ static int redraw(int x, int y, int width, int height);
 
 static struct tb_sprite background;
 static struct sprite_listnode **sprites;
+static pthread_mutex_t list_lock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t move_lock = PTHREAD_MUTEX_INITIALIZER;
 
 int tb_sprite_init(struct tb_sprite *sprite, int width, int height)
 {
@@ -77,13 +80,15 @@ int tb_sprite_add(struct tb_sprite *sprite)
 int tb_sprite_move(struct tb_sprite *sprite, int new_x, int new_y)
 {
 	int i, j, x, y, width, height;
+	pthread_mutex_lock(&move_lock);
+
 	x = sprite->x;
 	y = sprite->y;
 	width = sprite->width;
 	height = sprite->height;
 
 	if (x == new_x && y == new_y)
-		return 0;
+		goto success;
 
 	for (i = x; i < x+width; ++i) {
 		for (j = y; j < y+height; ++j) {
@@ -109,12 +114,14 @@ int tb_sprite_move(struct tb_sprite *sprite, int new_x, int new_y)
 	redraw(x, y, width, height);
 	redraw(new_x, new_y, width, height);
 
+success:
+	pthread_mutex_unlock(&move_lock);
 	return 0;
 }
 
 int tb_sprite_redraw(void)
 {
-	return redraw(background.x, background.y, 
+	return redraw(background.x, background.y,
 		      background.width, background.height);
 }
 
@@ -146,9 +153,10 @@ static int redraw(int x, int y, int width, int height)
 static int sprite_insert(struct sprite_listnode **list, struct tb_sprite *sprite)
 {
 	struct sprite_listnode *curr_node, *next_node, *new_node;
+	pthread_mutex_lock(&list_lock);
 
 	if (list == NULL)
-		return -1;
+		goto failure;
 
 	curr_node = *list;
 	new_node = malloc(sizeof(struct sprite_listnode));
@@ -157,13 +165,13 @@ static int sprite_insert(struct sprite_listnode **list, struct tb_sprite *sprite
 
 	if (curr_node == NULL) {
 		*list = new_node;
-		return 0;
+		goto success;
 	}
 
 	if (sprite->layer >= curr_node->sprite->layer) {
 		new_node->next = curr_node;
 		*list = new_node;
-		return 0;
+		goto success;
 	}
 
 	while (curr_node->next != NULL) {
@@ -173,29 +181,37 @@ static int sprite_insert(struct sprite_listnode **list, struct tb_sprite *sprite
 		    sprite->layer >= next_node->sprite->layer) {
 			curr_node->next = new_node;
 			new_node->next = next_node;
-			return 0;
+			goto success;
 		}
 
 		curr_node = next_node;
 	}
 
 	curr_node->next = new_node;
+
+success:
+	pthread_mutex_unlock(&list_lock);
 	return 0;
+
+failure:
+	pthread_mutex_unlock(&list_lock);
+	return -1;
 }
 
 static int sprite_remove(struct sprite_listnode **list, struct tb_sprite *sprite)
 {
 	struct sprite_listnode *curr_node, *next_node;
+	pthread_mutex_lock(&list_lock);
 
 	if (list == NULL || *list == NULL)
-		return -1;
+		goto failure;
 
 	curr_node = *list;
 
 	if (curr_node->sprite == sprite) {
 		*list = curr_node->next;
 		free(curr_node);
-		return 0;
+		goto success;
 	}
 
 	while (curr_node->next != NULL) {
@@ -204,11 +220,17 @@ static int sprite_remove(struct sprite_listnode **list, struct tb_sprite *sprite
 		if (next_node->sprite == sprite) {
 			curr_node->next = next_node->next;
 			free(next_node);
-			return 0;
+			goto success;
 		}
 
 		curr_node = next_node;
 	}
 
+failure:
+	pthread_mutex_unlock(&list_lock);
 	return -1;
+
+success:
+	pthread_mutex_unlock(&list_lock);
+	return 0;
 }
