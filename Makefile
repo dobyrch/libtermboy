@@ -15,8 +15,11 @@ $(DEMO): demo.c $(LIBTERMBOY)
 $(LIBTERMBOY): $(OBJECTS)
 	$(CC) -shared $^ -o $@
 
-$(OUT_DIR)/%.o: %.c termboy.h
+$(OUT_DIR)/%.o: %.c *.h
 	$(CC) $(CFLAGS) -c $< -o $@
+
+tags: *.c *.h
+	ctags $^
 
 .PHONY: run
 run: $(DEMO)
@@ -25,3 +28,4 @@ run: $(DEMO)
 .PHONY: clean
 clean:
 	rm -f out/*
+	rm -f tags

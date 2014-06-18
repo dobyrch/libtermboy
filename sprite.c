@@ -6,6 +6,8 @@
 
 #define SPRITES(x, y) (sprites[(y)*(background.width) + (x)])
 #define COLOR(sprite, x, y) ((sprite).colors[(y)*(sprite.width) + (x)])
+#define ON_SCREEN(x, y) ((x) >= 0 && (x) < background.width &&  \
+			    (y) >= 0 && (y) < background.height)
 
 struct sprite_listnode
 {
@@ -13,8 +15,8 @@ struct sprite_listnode
 	struct sprite_listnode *next;
 };
 
-static int sprite_insert(struct sprite_listnode **list, struct tb_sprite *sprite);
-static int sprite_remove(struct sprite_listnode **list, struct tb_sprite *sprite);
+static int sprite_insert(int x, int y, struct tb_sprite *sprite);
+static int sprite_remove(int x, int y, struct tb_sprite *sprite);
 static int redraw(int x, int y, int width, int height);
 
 static struct tb_sprite background;
@@ -56,7 +58,6 @@ struct tb_sprite *tb_sprite_background(void)
 	return &background;
 }
 
-/* TODO: Get lock when modifying layers */
 int tb_sprite_add(struct tb_sprite *sprite)
 {
 	int i, j, x, y, width, height;
@@ -68,7 +69,7 @@ int tb_sprite_add(struct tb_sprite *sprite)
 
 	for (i = x; i < x+width; ++i) {
 		for (j = y; j < y+height; ++j) {
-			sprite_insert(&SPRITES(i, j), sprite);
+			sprite_insert(i, j, sprite);
 		}
 	}
 
@@ -95,7 +96,7 @@ int tb_sprite_move(struct tb_sprite *sprite, int new_x, int new_y)
 			if (i >= new_x && i < new_x+width &&
 			    j >= new_y && j < new_y+height)
 				continue;
-			sprite_remove(&SPRITES(i, j), sprite);
+			sprite_remove(i, j, sprite);
 		}
 	}
 
@@ -104,7 +105,7 @@ int tb_sprite_move(struct tb_sprite *sprite, int new_x, int new_y)
 			if (i >=x && i < x+width &&
 			    j >= y && j < y+height)
 				continue;
-			sprite_insert(&SPRITES(i, j), sprite);
+			sprite_insert(i, j, sprite);
 		}
 	}
 
@@ -133,11 +134,13 @@ static int redraw(int x, int y, int width, int height)
 
 	for (i = x; i < x+width; ++i) {
 		for (j = y; j < y+height; ++j) {
+			if (!ON_SCREEN(i, j))
+				continue;
+
 			list = SPRITES(i, j);
 			if (list == NULL) {
 				tb_screen_put(i, j, COLOR(background, i, j));
 			} else {
-				/* TODO: Why can't this be dereferenced in the macro? */
 				top_layer = *list->sprite;
 				tb_screen_put(i, j, COLOR(top_layer,
 						 i - top_layer.x,
@@ -150,27 +153,27 @@ static int redraw(int x, int y, int width, int height)
 	return 0;
 }
 
-static int sprite_insert(struct sprite_listnode **list, struct tb_sprite *sprite)
+static int sprite_insert(int x, int y, struct tb_sprite *sprite)
 {
 	struct sprite_listnode *curr_node, *next_node, *new_node;
 	pthread_mutex_lock(&list_lock);
 
-	if (list == NULL)
+	if (!ON_SCREEN(x, y))
 		goto failure;
 
-	curr_node = *list;
+	curr_node = SPRITES(x, y);
 	new_node = malloc(sizeof(struct sprite_listnode));
 	new_node->sprite = sprite;
 	new_node->next = NULL;
 
 	if (curr_node == NULL) {
-		*list = new_node;
+		SPRITES(x, y) = new_node;
 		goto success;
 	}
 
 	if (sprite->layer >= curr_node->sprite->layer) {
 		new_node->next = curr_node;
-		*list = new_node;
+		SPRITES(x, y) = new_node;
 		goto success;
 	}
 
@@ -198,18 +201,21 @@ failure:
 	return -1;
 }
 
-static int sprite_remove(struct sprite_listnode **list, struct tb_sprite *sprite)
+static int sprite_remove(int x, int y, struct tb_sprite *sprite)
 {
 	struct sprite_listnode *curr_node, *next_node;
 	pthread_mutex_lock(&list_lock);
 
-	if (list == NULL || *list == NULL)
+	if (!ON_SCREEN(x, y))
 		goto failure;
 
-	curr_node = *list;
+	curr_node = SPRITES(x, y);
+
+	if (curr_node == NULL)
+		goto failure;
 
 	if (curr_node->sprite == sprite) {
-		*list = curr_node->next;
+		SPRITES(x, y) = curr_node->next;
 		free(curr_node);
 		goto success;
 	}
