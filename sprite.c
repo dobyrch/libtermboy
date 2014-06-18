@@ -65,7 +65,6 @@ int tb_sprite_add(struct tb_sprite *sprite)
 	y = sprite->y;
 	width = sprite->width;
 	height = sprite->height;
-	/* TODO: bounds checking */
 
 	for (i = x; i < x+width; ++i) {
 		for (j = y; j < y+height; ++j) {

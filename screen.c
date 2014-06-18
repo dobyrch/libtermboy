@@ -16,13 +16,12 @@ static unsigned char orig_font_data[1024 * 32 * 4];
 static int pixelmode = 0;
 
 /*
-TODO: dynamically allocate map in screen_pixelmode and
-save window dimensions for later calls to screen_getwinsize
+TODO: dynamically allocate map in screen_pixelmode
+and save window dimensions for later calls to screen_getwinsize
 */
 static unsigned char color_map[1920][1080];
 static pthread_mutex_t print_lock = PTHREAD_MUTEX_INITIALIZER;
 
-/* TODO: pass in pixel size */
 int tb_screen_init(int pixel_size)
 {
 	struct console_font_op new_font;
@@ -45,10 +44,6 @@ int tb_screen_init(int pixel_size)
 	}
 
 	if (pixelmode != pixel_size) {
-		/*
-		TODO: Create a 4x8 charset
-		use uppercase for top half, lowercase for bottom half
-		*/
 		memset(new_font_data + 0x540, 0xFF, 32);
 		new_font.op = KD_FONT_OP_SET;
 		new_font.flags = 0;
