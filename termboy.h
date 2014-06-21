@@ -13,6 +13,9 @@
 #define TB_KEY_RIGHT 0x4D
 #define TB_KEY_DOWN  0x50
 
+#define TB_SPRITE_COLOR(sprite, x, y) \
+	((sprite).colors[(y)*((sprite).width) + (x)])
+
 enum tb_listen_mode {
 	TB_LISTEN_BLOCKING,
 	TB_LISTEN_NONBLOCKING
@@ -21,7 +24,7 @@ enum tb_listen_mode {
 enum tb_color {
 	TB_COLOR_BLACK, TB_COLOR_RED, TB_COLOR_GREEN, TB_COLOR_YELLOW,
 	TB_COLOR_BLUE, TB_COLOR_MAGENTA, TB_COLOR_CYAN, TB_COLOR_WHITE,
-	BOLD
+	TB_COLOR_BOLD, TB_COLOR_TRANSPARENT = -1
 };
 
 struct tb_sprite {

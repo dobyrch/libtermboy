@@ -5,7 +5,6 @@
 #include "termboy.h"
 
 #define SPRITES(x, y) (sprites[(y)*(background.width) + (x)])
-#define COLOR(sprite, x, y) ((sprite).colors[(y)*(sprite.width) + (x)])
 #define ON_SCREEN(x, y) ((x) >= 0 && (x) < background.width &&  \
 			    (y) >= 0 && (y) < background.height)
 
@@ -129,7 +128,7 @@ static int redraw(int x, int y, int width, int height)
 {
 	int i, j;
 	struct sprite_listnode *list;
-	struct tb_sprite top_layer;
+	struct tb_sprite *top_layer;
 
 	for (i = x; i < x+width; ++i) {
 		for (j = y; j < y+height; ++j) {
@@ -137,13 +136,20 @@ static int redraw(int x, int y, int width, int height)
 				continue;
 
 			list = SPRITES(i, j);
+			while (list != NULL && TB_SPRITE_COLOR(*list->sprite,
+						i - list->sprite->x,
+						j - list->sprite->y)
+					== TB_COLOR_TRANSPARENT) {
+				list = list->next;
+			}
 			if (list == NULL) {
-				tb_screen_put(i, j, COLOR(background, i, j));
+				tb_screen_put(i, j, TB_SPRITE_COLOR(background,
+							i, j));
 			} else {
-				top_layer = *list->sprite;
-				tb_screen_put(i, j, COLOR(top_layer,
-						 i - top_layer.x,
-						 j - top_layer.y));
+				top_layer = list->sprite;
+				tb_screen_put(i, j, TB_SPRITE_COLOR(*top_layer,
+							i - top_layer->x,
+							j - top_layer->y));
 			}
 		}
 	}

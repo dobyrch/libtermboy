@@ -48,7 +48,7 @@ void *move_paddle(void *dir)
 }
 
 int main(void) {
-	int i;
+	int x, y;
 	struct tb_sprite *bg, thing1, thing2;
 
 	printf("\x1B[2J"); /* Clear screen */
@@ -56,26 +56,33 @@ int main(void) {
 	tb_screen_init(8);
 
 	bg = tb_sprite_background();
-	for (i = 0; i < bg->width * bg->height; ++i)
-		bg->colors[i] = rand()%15 + 1;
+	for (x = 0; x < bg->width; ++x)
+		for (y = 0; y < bg->height; ++y)
+			TB_SPRITE_COLOR(*bg, x, y) = (rand()%15 + 1);
 
 	tb_sprite_init(&paddle, 6, 6);
-	for (i = 0; i < 6*6; ++i)
-		paddle.colors[i] = TB_COLOR_BLACK;
+	for (x = 0; x < 6; ++x)
+		for (y = 0; y < 6; ++y)
+			TB_SPRITE_COLOR(paddle, x, y) = TB_COLOR_BLACK;
 	paddle.x = 50;
 	paddle.y = 50;
 	paddle.layer = 2;
 
 	tb_sprite_init(&thing1, 20, 13);
-	for (i = 0; i < 20*13; ++i)
-		thing1.colors[i] = TB_COLOR_RED;
+	for (x = 0; x < 20; ++x)
+		for (y = 0; y < 13; ++y)
+			TB_SPRITE_COLOR(thing1, x, y) = TB_COLOR_RED;
+	for (x = 5; x < 15; ++x)
+		for (y = 3; y < 10; ++y)
+			TB_SPRITE_COLOR(thing1, x, y) = TB_COLOR_TRANSPARENT;
 	thing1.x = 30;
 	thing1.y = 5;
 	thing1.layer = 3;
 
 	tb_sprite_init(&thing2, 16, 18);
-	for (i = 0; i < 16*18; ++i)
-		thing2.colors[i] = TB_COLOR_GREEN;
+	for (x = 0; x < 16; ++x)
+		for (y = 0; y < 18; ++y)
+			TB_SPRITE_COLOR(thing2, x, y) = TB_COLOR_GREEN;
 	thing2.x = 10;
 	thing2.y = 60;
 	thing2.layer = 1;

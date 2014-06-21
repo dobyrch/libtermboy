@@ -100,8 +100,8 @@ int tb_screen_put(int x, int y, enum tb_color color)
 	if (color_map[x][y] != color) {
 		/* TODO: Make separate function for printing CSI code(s) */
 		printf("\x1B[%d;%df", y+1, x+1);
-		if (color & BOLD)
-			printf("\x1B[1;3%dm*", color^BOLD);
+		if (color & TB_COLOR_BOLD)
+			printf("\x1B[1;3%dm*", color^TB_COLOR_BOLD);
 		else
 			printf("\x1B[0;3%dm*", color);
 
