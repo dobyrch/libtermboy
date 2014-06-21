@@ -5,15 +5,44 @@
 #include "termboy.h"
 
 static struct tb_sprite paddle;
-struct pos {
-	int x;
-	int y;
-};
 
-void *move_paddle(void *delta)
+void *move_paddle(void *dir)
 {
-	struct pos d = *(struct pos *)delta;
-	tb_sprite_move(&paddle, paddle.x + d.x, paddle.y + d.y);
+	char d = *(char *)dir;
+	int up, down, left, right, dx = 0, dy = 0;
+	up = tb_key_pressed(TB_KEY_UP);
+	down = tb_key_pressed(TB_KEY_DOWN);
+	left = tb_key_pressed(TB_KEY_LEFT);
+	right = tb_key_pressed(TB_KEY_RIGHT);
+
+	/* TODO: Create more convenient method for handling multi-key events */
+	switch (d) {
+		case 'U':
+			if (!left && !right && !down)
+				dy = -1;
+			break;
+		case 'D':
+			if (!left && !right && !up)
+				dy = 1;
+			break;
+		case 'L':
+			if (up && !down)
+				dy = -1;
+			else if (!up && down)
+				dy = 1;
+			if (!right)
+				dx = -1;
+			break;
+		case 'R':
+			if (up && !down)
+				dy = -1;
+			else if (!up && down)
+				dy = 1;
+			if (!left)
+				dx = 1;
+			break;
+	}
+	tb_sprite_move(&paddle, paddle.x + dx, paddle.y + dy);
 	usleep(20000);
 	return NULL;
 }
@@ -21,11 +50,6 @@ void *move_paddle(void *delta)
 int main(void) {
 	int i;
 	struct tb_sprite *bg, thing1, thing2;
-	struct pos up, down, left, right;
-	left.x  = -1; left.y  =  0;
-	right.x =  1; right.y =  0;
-	up.x    =  0; up.y    = -1;
-	down.x  =  0; down.y  =  1;
 
 	printf("\x1B[2J"); /* Clear screen */
 	printf("\x1B[?25l"); /* Hide cursor */
@@ -61,10 +85,10 @@ int main(void) {
 	tb_sprite_add(&thing2);
 	tb_sprite_redraw();
 
-	tb_key_handle_hold(TB_KEY_LEFT, move_paddle, &left);
-	tb_key_handle_hold(TB_KEY_RIGHT, move_paddle, &right);
-	tb_key_handle_hold(TB_KEY_UP, move_paddle, &up);
-	tb_key_handle_hold(TB_KEY_DOWN, move_paddle, &down);
+	tb_key_handle_hold(TB_KEY_LEFT, move_paddle, "LEFT");
+	tb_key_handle_hold(TB_KEY_RIGHT, move_paddle, "RIGHT");
+	tb_key_handle_hold(TB_KEY_UP, move_paddle, "UP");
+	tb_key_handle_hold(TB_KEY_DOWN, move_paddle, "DOWN");
 	tb_key_listen(TB_LISTEN_BLOCKING);
 
 	tb_screen_restore();
