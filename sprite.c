@@ -1,4 +1,3 @@
-#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "common.h"
@@ -14,6 +13,10 @@ struct sprite_listnode
 	struct sprite_listnode *next;
 };
 
+/*
+TODO: Make sprite first param to be consistent with method calling convention
+i.e. instance.method(args...) => method(instance, args...)
+*/
 static int sprite_insert(int x, int y, struct tb_sprite *sprite);
 static int sprite_remove(int x, int y, struct tb_sprite *sprite);
 static int redraw(int x, int y, int width, int height);
@@ -39,8 +42,9 @@ int tb_sprite_init(struct tb_sprite *sprite, int width, int height)
 /*
 TODO: Accept tb_sprite and point its background to the same buffer
 in order to prevent the user from modifying the other attributes
+(Or remove the concept of a 'background' entirely and let user
+initialize it as an ordinary sprite)
 */
-
 struct tb_sprite *tb_sprite_background(void)
 {
 	int width, height;
@@ -57,6 +61,7 @@ struct tb_sprite *tb_sprite_background(void)
 	return &background;
 }
 
+/* TODO: Rename to 'tb_sprite_show' and add a 'tb_sprite_hide' function */
 int tb_sprite_add(struct tb_sprite *sprite)
 {
 	int i, j, x, y, width, height;
@@ -118,6 +123,7 @@ success:
 	return 0;
 }
 
+/* TODO: Specify sprite to redraw */
 int tb_sprite_redraw(void)
 {
 	return redraw(background.x, background.y,

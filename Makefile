@@ -1,9 +1,9 @@
 CC = clang
 OUT_DIR = out
-CFLAGS = -Wall -fPIC -ansi -pedantic -g
+CFLAGS = -Wall -fPIC -g
 LDFLAGS = -L$(OUT_DIR)
 LDLIBS = -lpthread -ltermboy
-_OBJECTS = keyboard screen sprite
+_OBJECTS = keyboard screen sprite animation
 
 OBJECTS = $(patsubst %,$(OUT_DIR)/%.o,$(_OBJECTS))
 LIBTERMBOY = $(OUT_DIR)/libtermboy.so

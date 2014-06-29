@@ -1,4 +1,3 @@
-#include <pthread.h>
 #include <stdio.h>
 #include <termios.h>
 #include <unistd.h>
@@ -84,6 +83,7 @@ static void *repeat(void *key)
 	void *args = hold_args[k];
 
 	while (1) {
+		pthread_testcancel();
 		handler(args);
 	}
 
@@ -138,13 +138,13 @@ static void *key_listen_helper(void *arg)
 			key ^= KEY_RELEASE;
 			if (pressed[key] == 0)
 				continue;
+			if (hold_handlers[key]) {
+				pthread_cancel(hold_threads[key]);
+			}
 			if (release_handlers[key]) {
 				pthread_create(&thread, &attr,
 						release_handlers[key],
 						release_args[key]);
-			}
-			if (hold_handlers[key]) {
-				pthread_cancel(hold_threads[key]);
 			}
 			pressed[key] = 0;
 		} else {

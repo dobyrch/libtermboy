@@ -1,5 +1,9 @@
 #pragma once
 
+#include <pthread.h>
+#include <string.h>
+#include <time.h>
+
 #define TB_KEY_ESC   0x01
 #define TB_KEY_E     0x12
 #define TB_KEY_A     0x1E
@@ -15,6 +19,18 @@
 
 #define TB_SPRITE_COLOR(sprite, x, y) \
 	((sprite).colors[(y)*((sprite).width) + (x)])
+
+#define TB_SPRITE_FILL(sprite, data) \
+	memcpy((sprite).colors, (data), \
+	sizeof(enum tb_color) * (sprite).width * (sprite).height)
+
+#define TB_MILLISLEEP(ms) \
+	do { \
+		struct timespec ts; \
+		ts.tv_sec = (ms) / 1000; \
+		ts.tv_nsec = (ms % 1000) * 1000000; \
+		nanosleep(&ts, NULL); \
+	} while (0)
 
 enum tb_listen_mode {
 	TB_LISTEN_BLOCKING,
@@ -36,6 +52,15 @@ struct tb_sprite {
 	enum tb_color *colors;
 };
 
+struct tb_animation {
+	struct tb_sprite *sprite;
+	int frames;
+	int *delays;
+	enum tb_color **data;
+	int _frames;
+	pthread_t _thread;
+};
+
 int tb_key_listen(enum tb_listen_mode);
 int tb_key_pressed(int key);
 void tb_key_handle_press(int key, void *(*handler)(void *), void *args);
@@ -53,3 +78,8 @@ int tb_sprite_init(struct tb_sprite *sprite, int width, int height);
 int tb_sprite_add(struct tb_sprite *sprite);
 int tb_sprite_move(struct tb_sprite *sprite, int x, int y);
 int tb_sprite_redraw(void);
+
+int tb_animation_init(struct tb_animation *animation, struct tb_sprite *sprite, int frames);
+int tb_animation_add_frame(struct tb_animation *animation, enum tb_color *colors, int delay_ms);
+int tb_animation_start(struct tb_animation *animation);
+int tb_animation_stop(struct tb_animation *animation);
