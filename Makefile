@@ -9,7 +9,7 @@ OBJECTS = $(patsubst %,$(OUT_DIR)/%.o,$(_OBJECTS))
 LIBTERMBOY = $(OUT_DIR)/libtermboy.so
 DEMO = $(OUT_DIR)/demo
 
-$(DEMO): demo.c $(LIBTERMBOY)
+$(DEMO): demo.c images/*.h $(LIBTERMBOY)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(LDLIBS) $< -o $@
 
 $(LIBTERMBOY): $(OBJECTS)

@@ -1,0 +1,47 @@
+#!/usr/bin/bash
+
+#TODO: Print image dimensions, error handling
+
+image=${1:?}
+
+function hex_to_dec() {
+	dc -e "16 i ${*} f" | \
+	tac
+}
+
+read width height <<< $(identify -format '%w %h' ${1})
+
+echo -n 'const enum tb_color '
+echo -n $(basename ${1} | cut -d '.' -f 1)
+echo "[${width}*${height}] = {"
+
+stream -map orgb "${image}" /dev/stdout | \
+xxd -c4 -g1 -u | \
+cut -d ' ' -f 2-6 | \
+while read pixel; do
+	read opacity red green blue  <<< $(hex_to_dec ${pixel})
+
+	tb_color=0
+	((tb_color |= (blue >= 0x60) << 0))
+	((tb_color |= (green >= 0x60) << 1))
+	((tb_color |= (red >= 0x60) << 2))
+
+	# ANSI color codes do not follow the same ordering as their
+	# respective RGB values, so we need to swap mismatched values
+	case $tb_color in
+		1) tb_color=4;;
+		3) tb_color=6;;
+		4) tb_color=1;;
+		6) tb_color=3;;
+	esac
+
+	luminance=$((red*3 + blue*1 + green*4 >> 3))
+	((tb_color |= (luminance >= 0x60) << 3))
+
+	if (( opacity & 0x80 )); then
+		tb_color=-1
+	fi
+	printf '%s, ' ${tb_color}
+done
+
+echo '};'

@@ -28,7 +28,7 @@ static pthread_mutex_t move_lock = PTHREAD_MUTEX_INITIALIZER;
 
 int tb_sprite_init(struct tb_sprite *sprite, int width, int height)
 {
-	/* TODO: check for invalid parameters */
+	/* TODO: Check for invalid parameters */
 	sprite->x = 0;
 	sprite->y = 0;
 	sprite->width = width;

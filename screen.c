@@ -10,12 +10,12 @@
 #include "termboy.h"
 
 static struct console_font_op orig_font;
-/* TODO: reference kernel code that explains these magic numbers */
+/* TODO: Reference kernel code that explains these magic numbers */
 static unsigned char orig_font_data[1024 * 32 * 4];
 static int pixelmode = 0;
 
 /*
-TODO: dynamically allocate map in screen_pixelmode
+TODO: Dynamically allocate map in screen_pixelmode
 and save window dimensions for later calls to screen_getwinsize
 */
 static unsigned char color_map[1920][1080];
@@ -80,7 +80,7 @@ See setvtrgb.c from the kbd project and
 `man console_ioctl` for more info.
 */
 
-int tb_screen_size(int *width, int*height)
+int tb_screen_size(int *width, int *height)
 {
 	int fd;
 	struct winsize ws;
@@ -96,6 +96,7 @@ int tb_screen_size(int *width, int*height)
 int tb_screen_put(int x, int y, enum tb_color color)
 {
 	pthread_mutex_lock(&print_lock);
+	/* TODO: Check bounds */
 	if (color_map[x][y] != color) {
 		/* TODO: Make separate function for printing CSI code(s) */
 		printf("\x1B[%d;%df", y+1, x+1);

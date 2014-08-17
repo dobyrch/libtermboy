@@ -52,6 +52,7 @@ static void *animate(void *arg)
 	i = 0;
 	while (1) {
 		colors = animation->data[i];
+		/* TODO: Assign pointer instead of copying? */
 		TB_SPRITE_FILL(sprite, colors);
 		tb_sprite_redraw();
 		
