@@ -33,17 +33,18 @@ void *stop_walking(void *arg)
 	return NULL;
 }
 
-int main(void) {
-	static struct tb_sprite link;
+int main(void)
+{
+	static struct tb_sprite link, background;
 	static struct tb_animation link_walk;
-	struct tb_sprite *bg;
 
 	printf("\x1B[2J");
 	printf("\x1B[?25l");
 	tb_screen_init(4);
 
-	bg = tb_sprite_background();
-	TB_SPRITE_FILL(*bg, map);
+	tb_sprite_background();
+	tb_sprite_init(&background, 480, 270);
+	TB_SPRITE_FILL(background, map);
 
 	tb_sprite_init(&link, 14, 16);
 	TB_SPRITE_FILL(link, link_right_stand);
@@ -52,6 +53,7 @@ int main(void) {
 	link.y = 77;
 	link.layer = 2;
 
+	tb_sprite_add(&background);
 	tb_sprite_add(&link);
 	tb_sprite_redraw();
 

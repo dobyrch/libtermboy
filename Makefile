@@ -25,6 +25,10 @@ tags: *.c *.h
 run: $(DEMO)
 	LD_LIBRARY_PATH=$(OUT_DIR) $(DEMO)
 
+.PHONY: debug
+debug: $(DEMO)
+	LD_LIBRARY_PATH=$(OUT_DIR) gdb $(DEMO)
+
 .PHONY: clean
 clean:
 	rm -f out/*
