@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-#TODO: Print image dimensions, error handling
+#TODO: Error handling
 
 image=${1:?}
 
@@ -11,7 +11,7 @@ function hex_to_dec() {
 
 read width height <<< $(identify -format '%w %h' ${1})
 
-echo -n 'const enum tb_color '
+echo -n 'enum tb_color '
 echo -n $(basename ${1} | cut -d '.' -f 1)
 echo "[${width}*${height}] = {"
 
@@ -41,7 +41,14 @@ while read pixel; do
 	if (( opacity & 0x80 )); then
 		tb_color=-1
 	fi
-	printf '%s, ' ${tb_color}
+	printf '%2s,' ${tb_color}
+
+	((++pixel_count))
+	if (( pixel_count % width )); then
+		printf ' '
+	else
+		printf '\n'
+	fi
 done
 
 echo '};'
