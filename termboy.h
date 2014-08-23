@@ -62,6 +62,7 @@ struct tb_animation {
 };
 
 int tb_key_listen(enum tb_listen_mode);
+int tb_key_restore(void);
 int tb_key_pressed(int key);
 void tb_key_handle_press(int key, void *(*handler)(void *), void *args);
 void tb_key_handle_release(int key, void *(*handler)(void *), void *args);

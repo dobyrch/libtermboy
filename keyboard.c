@@ -9,7 +9,6 @@
 #define KEY_RELEASE (1<<7)
 
 static int key_init(void);
-static int key_restore(void);
 static void *key_listen_helper(void *arg);
 
 static struct termios tty_attr_orig;
@@ -83,8 +82,10 @@ static void *repeat(void *key)
 	void *args = hold_args[k];
 
 	while (1) {
-		pthread_testcancel();
+		pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
 		handler(args);
+		pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+		pthread_testcancel();
 	}
 
 	return NULL;
@@ -109,7 +110,7 @@ static int key_init(void)
 	return 0;
 }
 
-static int key_restore(void)
+int tb_key_restore(void)
 {
 	if (rawmode) {
 		CHECK(tcsetattr(STDIN_FILENO, TCSAFLUSH, &tty_attr_orig));
@@ -164,7 +165,7 @@ static void *key_listen_helper(void *arg)
 		}
 	} while (key != TB_KEY_ESC);
 
-	key_restore();
+	tb_key_restore();
 
 	pthread_attr_destroy(&attr);
 

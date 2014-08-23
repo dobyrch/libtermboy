@@ -1,3 +1,4 @@
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -33,11 +34,20 @@ void *stop_walking(void *arg)
 	return NULL;
 }
 
+void handler(int sig)
+{
+	tb_screen_restore();
+	tb_key_restore();
+	signal(sig, SIG_DFL);
+	kill(getpid(), sig);
+}
+
 int main(void)
 {
 	static struct tb_sprite link, background;
 	static struct tb_animation link_walk;
 
+	signal(SIGSEGV, handler);
 	printf("\x1B[2J");
 	printf("\x1B[?25l");
 	tb_screen_init(4);
