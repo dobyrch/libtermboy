@@ -48,8 +48,6 @@ int main(void)
 	static struct tb_animation link_walk;
 
 	signal(SIGSEGV, handler);
-	printf("\x1B[2J");
-	printf("\x1B[?25l");
 	tb_screen_init(4);
 
 	tb_sprite_background();
@@ -77,7 +75,6 @@ int main(void)
 	tb_key_listen(TB_LISTEN_BLOCKING);
 
 	tb_screen_restore();
-	printf("\x1B[2J\n");
 
 	return EXIT_SUCCESS;
 }

@@ -91,6 +91,7 @@ static void *repeat(void *key)
 	return NULL;
 }
 
+/* Make this function public? */
 static int key_init(void)
 {
 	struct termios tty_attr;

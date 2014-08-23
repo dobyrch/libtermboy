@@ -4,6 +4,7 @@
 #include <string.h>
 #include <time.h>
 
+/* TODO: List all keys in enum */
 #define TB_KEY_ESC   0x01
 #define TB_KEY_E     0x12
 #define TB_KEY_A     0x1E
@@ -17,6 +18,7 @@
 #define TB_KEY_RIGHT 0x4D
 #define TB_KEY_DOWN  0x50
 
+/* TODO: Switch macros to inline functions? */
 #define TB_SPRITE_COLOR(sprite, x, y) \
 	((sprite).colors[(y)*((sprite).width) + (x)])
 
@@ -64,6 +66,10 @@ struct tb_animation {
 int tb_key_listen(enum tb_listen_mode);
 int tb_key_restore(void);
 int tb_key_pressed(int key);
+/*
+TODO: Merge into single function
+pass in tb_event (e.g. TB_EVENT_PRESS)
+*/
 void tb_key_handle_press(int key, void *(*handler)(void *), void *args);
 void tb_key_handle_release(int key, void *(*handler)(void *), void *args);
 void tb_key_handle_hold(int key, void *(*handler)(void *), void *args);

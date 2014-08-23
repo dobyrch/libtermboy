@@ -9,6 +9,9 @@
 #include "common.h"
 #include "termboy.h"
 
+static void screen_clear(void);
+static void screen_showcursor(int visible);
+
 static struct console_font_op orig_font;
 /* TODO: Reference kernel code that explains these magic numbers */
 static unsigned char orig_font_data[1024 * 32 * 4];
@@ -54,6 +57,8 @@ int tb_screen_init(int pixel_size)
 	}
 
 	CHECK(close(fd));
+	screen_showcursor(0);
+	screen_clear();
 
 	pixelmode = pixel_size;
 	return 0;
@@ -68,8 +73,11 @@ int tb_screen_restore(void)
 		orig_font.op = KD_FONT_OP_SET;
 		CHECK(ioctl(fd, KDFONTOP, &orig_font));
 		CHECK(close(fd));
+		screen_showcursor(1);
+		screen_clear();
 		pixelmode = 0;
 	}
+
 
 	return 0;
 }
@@ -116,4 +124,18 @@ int tb_screen_flush(void)
 {
 	fflush(stdout);
 	return 0;
+}
+
+static void screen_clear(void)
+{
+	printf("\x1B[2J");
+}
+
+/* TODO: use booleans? */
+static void screen_showcursor(int visible)
+{
+	if (visible)
+		printf("\x1B[?25h");
+	else
+		printf("\x1B[?25l");
 }
