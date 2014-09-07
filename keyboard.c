@@ -101,7 +101,7 @@ static int key_init(void)
 
 	CHECK(tcgetattr(STDIN_FILENO, &tty_attr_orig));
 	tty_attr = tty_attr_orig;
-	tty_attr.c_lflag &= ~(ICANON | ECHO | ISIG);
+	cfmakeraw(&tty_attr);
 	CHECK(tcsetattr(STDIN_FILENO, TCSANOW, &tty_attr));
 
 	CHECK(ioctl(STDIN_FILENO, KDGKBMODE, &kbd_mode_orig));
