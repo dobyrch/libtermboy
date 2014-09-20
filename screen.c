@@ -15,11 +15,11 @@ static void screen_showcursor(int visible);
 static struct console_font_op orig_font;
 /* TODO: Reference kernel code that explains these magic numbers */
 static unsigned char orig_font_data[1024 * 32 * 4];
-static int pixelmode = 0;
-static int fd;
+static int pixel_mode = 0;
+static int tty_fd;
 
 /*
-TODO: Dynamically allocate map in screen_pixelmode
+TODO: Dynamically allocate map in screen_pixel_mode
 and save window dimensions for later calls to screen_getwinsize
 */
 static unsigned char color_map[1920][1080];
@@ -33,17 +33,17 @@ int tb_screen_init(int pixel_size)
 	if (pixel_size < 1 || pixel_size > 8)
 		return -1;
 
-	if (!pixelmode) {
-		CHECK(fd = open("/dev/tty", O_RDONLY));
+	if (!pixel_mode) {
+		CHECK(tty_fd = open("/dev/tty", O_RDONLY));
 		orig_font.op = KD_FONT_OP_GET;
 		orig_font.flags = 0;
 		orig_font.width = orig_font.height = 32;
 		orig_font.charcount = 1024;
 		orig_font.data = orig_font_data;
-		CHECK(ioctl(fd, KDFONTOP, &orig_font));
+		CHECK(ioctl(tty_fd, KDFONTOP, &orig_font));
 	}
 
-	if (pixelmode != pixel_size) {
+	if (pixel_mode != pixel_size) {
 		memset(new_font_data + 0x540, 0xFF, 32);
 		new_font.op = KD_FONT_OP_SET;
 		new_font.flags = 0;
@@ -51,25 +51,25 @@ int tb_screen_init(int pixel_size)
 		new_font.height = pixel_size;
 		new_font.charcount = 256;
 		new_font.data = new_font_data;
-		CHECK(ioctl(fd, KDFONTOP, &new_font));
+		CHECK(ioctl(tty_fd, KDFONTOP, &new_font));
 	}
 
 	screen_showcursor(0);
 	screen_clear();
 
-	pixelmode = pixel_size;
+	pixel_mode = pixel_size;
 	return 0;
 }
 
 int tb_screen_restore(void)
 {
-	if (pixelmode) {
+	if (pixel_mode) {
 		orig_font.op = KD_FONT_OP_SET;
-		CHECK(ioctl(fd, KDFONTOP, &orig_font));
+		CHECK(ioctl(tty_fd, KDFONTOP, &orig_font));
 		screen_showcursor(1);
 		screen_clear();
-		pixelmode = 0;
-		CHECK(close(fd));
+		pixel_mode = 0;
+		CHECK(close(tty_fd));
 	}
 
 
@@ -86,7 +86,7 @@ int tb_screen_size(int *width, int *height)
 {
 	struct winsize ws;
 
-	CHECK(ioctl(fd, TIOCGWINSZ, &ws));
+	CHECK(ioctl(tty_fd, TIOCGWINSZ, &ws));
 	*width = ws.ws_col;
 	*height = ws.ws_row;
 
