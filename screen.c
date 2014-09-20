@@ -103,20 +103,25 @@ int tb_screen_size(int *width, int *height)
 
 int tb_screen_put(int x, int y, enum tb_color color)
 {
-	pthread_mutex_lock(&print_lock);
+	static int lastx = -1, lasty = -1;
+
 	/* TODO: Check bounds */
+	pthread_mutex_lock(&print_lock);
 	if (color_map[x][y] != color) {
 		/* TODO: Make separate function for printing CSI code(s) */
-		printf("\x1B[%d;%df", y+1, x+1);
+		if (x != lastx+1 || y != lasty)
+			printf("\x1B[%d;%df", y+1, x+1);
 		if (color & TB_COLOR_BOLD)
 			printf("\x1B[1;3%dm*", color^TB_COLOR_BOLD);
 		else
 			printf("\x1B[0;3%dm*", color);
 
 		color_map[x][y] = color;
+		lastx = x;
+		lasty = y;
 	}
-
 	pthread_mutex_unlock(&print_lock);
+
 	return 0;
 }
 
