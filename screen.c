@@ -121,7 +121,7 @@ void tb_screen_size(int *width, int *height)
 
 static void screen_clear(void)
 {
-	printf("\x1B[2J");
+	printf("\x1B""c");
 }
 
 /* TODO: use booleans? */
