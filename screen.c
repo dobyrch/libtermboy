@@ -16,6 +16,7 @@ static struct console_font_op orig_font;
 /* TODO: Reference kernel code that explains these magic numbers */
 static unsigned char orig_font_data[1024 * 32 * 4];
 static int pixelmode = 0;
+static int fd;
 
 /*
 TODO: Dynamically allocate map in screen_pixelmode
@@ -28,15 +29,12 @@ int tb_screen_init(int pixel_size)
 {
 	struct console_font_op new_font;
 	unsigned char new_font_data[256 * 32 * 1];
-	int fd;
 
 	if (pixel_size < 1 || pixel_size > 8)
 		return -1;
 
-	/* TODO: Keep fd until call to screen_restore? */
-	CHECK(fd = open("/dev/tty", O_RDONLY));
-
 	if (!pixelmode) {
+		CHECK(fd = open("/dev/tty", O_RDONLY));
 		orig_font.op = KD_FONT_OP_GET;
 		orig_font.flags = 0;
 		orig_font.width = orig_font.height = 32;
@@ -56,7 +54,6 @@ int tb_screen_init(int pixel_size)
 		CHECK(ioctl(fd, KDFONTOP, &new_font));
 	}
 
-	CHECK(close(fd));
 	screen_showcursor(0);
 	screen_clear();
 
@@ -66,16 +63,13 @@ int tb_screen_init(int pixel_size)
 
 int tb_screen_restore(void)
 {
-	int fd;
-
 	if (pixelmode) {
-		CHECK(fd = open("/dev/tty", O_RDONLY));
 		orig_font.op = KD_FONT_OP_SET;
 		CHECK(ioctl(fd, KDFONTOP, &orig_font));
-		CHECK(close(fd));
 		screen_showcursor(1);
 		screen_clear();
 		pixelmode = 0;
+		CHECK(close(fd));
 	}
 
 
@@ -90,10 +84,8 @@ See setvtrgb.c from the kbd project and
 
 int tb_screen_size(int *width, int *height)
 {
-	int fd;
 	struct winsize ws;
 
-	CHECK(fd = open("/dev/tty", O_RDONLY));
 	CHECK(ioctl(fd, TIOCGWINSZ, &ws));
 	*width = ws.ws_col;
 	*height = ws.ws_row;
