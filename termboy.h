@@ -76,9 +76,9 @@ void tb_key_handle_hold(int key, void *(*handler)(void *), void *args);
 
 int tb_screen_init(int pixel_size);
 int tb_screen_restore(void);
-int tb_screen_size(int *width, int *height);
 int tb_screen_put(int x, int y, enum tb_color color);
 int tb_screen_flush(void);
+void tb_screen_size(int *width, int *height);
 
 struct tb_sprite *tb_sprite_background(void);
 int tb_sprite_init(struct tb_sprite *sprite, int width, int height);

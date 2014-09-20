@@ -12,16 +12,14 @@
 static void screen_clear(void);
 static void screen_showcursor(int visible);
 
-static struct console_font_op orig_font;
-/* TODO: Reference kernel code that explains these magic numbers */
-static unsigned char orig_font_data[1024 * 32 * 4];
 static int pixel_mode = 0;
 static int tty_fd;
 
-/*
-TODO: Dynamically allocate map in screen_pixel_mode
-and save window dimensions for later calls to screen_getwinsize
-*/
+static struct console_font_op orig_font;
+/* TODO: Reference kernel code that explains these magic numbers */
+static unsigned char orig_font_data[1024 * 32 * 4];
+
+struct winsize size;
 static unsigned char color_map[1920][1080];
 static pthread_mutex_t print_lock = PTHREAD_MUTEX_INITIALIZER;
 
@@ -41,6 +39,9 @@ int tb_screen_init(int pixel_size)
 		orig_font.charcount = 1024;
 		orig_font.data = orig_font_data;
 		CHECK(ioctl(tty_fd, KDFONTOP, &orig_font));
+
+		screen_showcursor(0);
+		screen_clear();
 	}
 
 	if (pixel_mode != pixel_size) {
@@ -52,12 +53,11 @@ int tb_screen_init(int pixel_size)
 		new_font.charcount = 256;
 		new_font.data = new_font_data;
 		CHECK(ioctl(tty_fd, KDFONTOP, &new_font));
+
+		CHECK(ioctl(tty_fd, TIOCGWINSZ, &size));
+		pixel_mode = pixel_size;
 	}
 
-	screen_showcursor(0);
-	screen_clear();
-
-	pixel_mode = pixel_size;
 	return 0;
 }
 
@@ -81,17 +81,6 @@ Use ioctl PIO_CMAP to set term colors.
 See setvtrgb.c from the kbd project and
 `man console_ioctl` for more info.
 */
-
-int tb_screen_size(int *width, int *height)
-{
-	struct winsize ws;
-
-	CHECK(ioctl(tty_fd, TIOCGWINSZ, &ws));
-	*width = ws.ws_col;
-	*height = ws.ws_row;
-
-	return 0;
-}
 
 int tb_screen_put(int x, int y, enum tb_color color)
 {
@@ -121,6 +110,12 @@ int tb_screen_flush(void)
 {
 	fflush(stdout);
 	return 0;
+}
+
+void tb_screen_size(int *width, int *height)
+{
+	*width = size.ws_col;
+	*height = size.ws_row;
 }
 
 static void screen_clear(void)
