@@ -1,5 +1,6 @@
 #include <fcntl.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <stropts.h>
 #include <unistd.h>
@@ -20,7 +21,7 @@ static struct console_font_op orig_font;
 static unsigned char orig_font_data[1024 * 32 * 4];
 
 struct winsize size;
-static unsigned char color_map[1920][1080];
+static unsigned char *color_map;
 static pthread_mutex_t print_lock = PTHREAD_MUTEX_INITIALIZER;
 
 int tb_screen_init(int pixel_size)
@@ -39,9 +40,6 @@ int tb_screen_init(int pixel_size)
 		orig_font.charcount = 1024;
 		orig_font.data = orig_font_data;
 		CHECK(ioctl(tty_fd, KDFONTOP, &orig_font));
-
-		screen_showcursor(0);
-		screen_clear();
 	}
 
 	if (pixel_mode != pixel_size) {
@@ -54,9 +52,19 @@ int tb_screen_init(int pixel_size)
 		new_font.data = new_font_data;
 		CHECK(ioctl(tty_fd, KDFONTOP, &new_font));
 
-		CHECK(ioctl(tty_fd, TIOCGWINSZ, &size));
 		pixel_mode = pixel_size;
+		CHECK(ioctl(tty_fd, TIOCGWINSZ, &size));
+		free(color_map);
+		color_map = calloc(sizeof(char), size.ws_col*size.ws_row);
+		if (color_map == NULL) {
+			tb_screen_restore();
+			return -1;
+		}
+
 	}
+
+	screen_showcursor(0);
+	screen_clear();
 
 	return 0;
 }
@@ -66,12 +74,12 @@ int tb_screen_restore(void)
 	if (pixel_mode) {
 		orig_font.op = KD_FONT_OP_SET;
 		CHECK(ioctl(tty_fd, KDFONTOP, &orig_font));
+		CHECK(close(tty_fd));
+		free(color_map);
 		screen_showcursor(1);
 		screen_clear();
 		pixel_mode = 0;
-		CHECK(close(tty_fd));
 	}
-
 
 	return 0;
 }
@@ -90,7 +98,7 @@ int tb_screen_put(int x, int y, enum tb_color color)
 		return -1;
 
 	pthread_mutex_lock(&print_lock);
-	if (color_map[x][y] != color) {
+	if (color_map[x + y*size.ws_col] != color) {
 		if (x != lastx+1 || y != lasty)
 			printf("\x1B[%d;%df", y+1, x+1);
 		if (color & TB_COLOR_BOLD)
@@ -98,7 +106,7 @@ int tb_screen_put(int x, int y, enum tb_color color)
 		else
 			printf("\x1B[0;3%dm*", color);
 
-		color_map[x][y] = color;
+		color_map[x + y*size.ws_col] = color;
 		lastx = x;
 		lasty = y;
 	}
@@ -107,10 +115,9 @@ int tb_screen_put(int x, int y, enum tb_color color)
 	return 0;
 }
 
-int tb_screen_flush(void)
+void tb_screen_flush(void)
 {
 	fflush(stdout);
-	return 0;
 }
 
 void tb_screen_size(int *width, int *height)
