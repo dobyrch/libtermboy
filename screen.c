@@ -86,10 +86,11 @@ int tb_screen_put(int x, int y, enum tb_color color)
 {
 	static int lastx = -1, lasty = -1;
 
-	/* TODO: Check bounds */
+	if (x >= size.ws_col || y >= size.ws_row || x < 0 || y < 0)
+		return -1;
+
 	pthread_mutex_lock(&print_lock);
 	if (color_map[x][y] != color) {
-		/* TODO: Make separate function for printing CSI code(s) */
 		if (x != lastx+1 || y != lasty)
 			printf("\x1B[%d;%df", y+1, x+1);
 		if (color & TB_COLOR_BOLD)
