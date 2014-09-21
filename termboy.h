@@ -77,6 +77,7 @@ void tb_key_handle_hold(int key, void *(*handler)(void *), void *args);
 int tb_screen_init(int pixel_size);
 int tb_screen_restore(void);
 int tb_screen_put(int x, int y, enum tb_color color);
+void tb_screen_color(enum tb_color color, int value);
 void tb_screen_flush(void);
 void tb_screen_size(int *width, int *height);
 

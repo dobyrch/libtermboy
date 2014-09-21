@@ -72,23 +72,19 @@ int tb_screen_init(int pixel_size)
 int tb_screen_restore(void)
 {
 	if (pixel_mode) {
+		screen_showcursor(1);
+		screen_clear();
+		size.ws_col = size.ws_row = 0;
+		free(color_map);
+
 		orig_font.op = KD_FONT_OP_SET;
 		CHECK(ioctl(tty_fd, KDFONTOP, &orig_font));
 		CHECK(close(tty_fd));
-		free(color_map);
-		screen_showcursor(1);
-		screen_clear();
 		pixel_mode = 0;
 	}
 
 	return 0;
 }
-
-/*
-Use ioctl PIO_CMAP to set term colors.
-See setvtrgb.c from the kbd project and
-`man console_ioctl` for more info.
-*/
 
 int tb_screen_put(int x, int y, enum tb_color color)
 {
@@ -100,11 +96,11 @@ int tb_screen_put(int x, int y, enum tb_color color)
 	pthread_mutex_lock(&print_lock);
 	if (color_map[x + y*size.ws_col] != color) {
 		if (x != lastx+1 || y != lasty)
-			printf("\x1B[%d;%df", y+1, x+1);
+			printf("\e[%d;%df", y+1, x+1);
 		if (color & TB_COLOR_BOLD)
-			printf("\x1B[1;3%dm*", color^TB_COLOR_BOLD);
+			printf("\e[1;3%dm*", color^TB_COLOR_BOLD);
 		else
-			printf("\x1B[0;3%dm*", color);
+			printf("\e[0;3%dm*", color);
 
 		color_map[x + y*size.ws_col] = color;
 		lastx = x;
@@ -113,6 +109,11 @@ int tb_screen_put(int x, int y, enum tb_color color)
 	pthread_mutex_unlock(&print_lock);
 
 	return 0;
+}
+
+void tb_screen_color(enum tb_color color, int value)
+{
+	printf("\e]P%X%.6X", color, value);
 }
 
 void tb_screen_flush(void)
@@ -128,14 +129,15 @@ void tb_screen_size(int *width, int *height)
 
 static void screen_clear(void)
 {
-	printf("\x1B""c");
+	printf("\e[2J");
+	printf("\e[f");
 }
 
 /* TODO: use booleans? */
 static void screen_showcursor(int visible)
 {
 	if (visible)
-		printf("\x1B[?25h");
+		printf("\e[?25h");
 	else
-		printf("\x1B[?25l");
+		printf("\e[?25l");
 }
