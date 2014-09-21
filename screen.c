@@ -10,15 +10,18 @@
 #include "common.h"
 #include "termboy.h"
 
+#define MAX_FONT_SIZE 65536
+#define BYTES_PER_CHAR 32
+#define MAGIC_CHAR '*'
+
 static void screen_clear(void);
 static void screen_showcursor(int visible);
 
-static int pixel_mode = 0;
 static int tty_fd;
+static int pixel_mode = 0;
 
 static struct console_font_op orig_font;
-/* TODO: Reference kernel code that explains these magic numbers */
-static unsigned char orig_font_data[1024 * 32 * 4];
+static unsigned char orig_font_data[MAX_FONT_SIZE];
 
 struct winsize size;
 static unsigned char *color_map;
@@ -27,7 +30,7 @@ static pthread_mutex_t print_lock = PTHREAD_MUTEX_INITIALIZER;
 int tb_screen_init(int pixel_size)
 {
 	struct console_font_op new_font;
-	unsigned char new_font_data[256 * 32 * 1];
+	unsigned char new_font_data[256*BYTES_PER_CHAR];
 
 	if (pixel_size < 1 || pixel_size > 8)
 		return -1;
@@ -43,7 +46,9 @@ int tb_screen_init(int pixel_size)
 	}
 
 	if (pixel_mode != pixel_size) {
-		memset(new_font_data + 0x540, 0xFF, 32);
+		memset(new_font_data + MAGIC_CHAR*BYTES_PER_CHAR,
+			0xFF,
+			BYTES_PER_CHAR);
 		new_font.op = KD_FONT_OP_SET;
 		new_font.flags = 0;
 		new_font.width = pixel_size;
@@ -97,10 +102,11 @@ int tb_screen_put(int x, int y, enum tb_color color)
 	if (color_map[x + y*size.ws_col] != color) {
 		if (x != lastx+1 || y != lasty)
 			printf("\e[%d;%df", y+1, x+1);
-		if (color & TB_COLOR_BOLD)
-			printf("\e[1;3%dm*", color^TB_COLOR_BOLD);
-		else
-			printf("\e[0;3%dm*", color);
+
+		printf("\e[%d;3%dm%c",
+			(color & TB_COLOR_BOLD) != 0,
+			color & ~TB_COLOR_BOLD,
+			MAGIC_CHAR);
 
 		color_map[x + y*size.ws_col] = color;
 		lastx = x;
