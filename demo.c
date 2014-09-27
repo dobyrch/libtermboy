@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <linux/input.h>
 #include "termboy.h"
 #include "images/all.h"
 
@@ -98,12 +99,12 @@ int main(void)
 	tb_animation_add_frame(&waves_anim, WAVES1, 200);
 	tb_animation_start(&waves_anim);
 
-	tb_key_handle_press(TB_KEY_RIGHT, start_walking, &right);
-	tb_key_handle_press(TB_KEY_LEFT, start_walking, &left);
-	tb_key_handle_hold(TB_KEY_RIGHT, keep_walking, &right);
-	tb_key_handle_hold(TB_KEY_LEFT, keep_walking, &left);
-	tb_key_handle_release(TB_KEY_RIGHT, stop_walking, &right);
-	tb_key_handle_release(TB_KEY_LEFT, stop_walking, &left);
+	tb_key_handle_press(KEY_RIGHT, start_walking, &right);
+	tb_key_handle_press(KEY_LEFT, start_walking, &left);
+	tb_key_handle_hold(KEY_RIGHT, keep_walking, &right);
+	tb_key_handle_hold(KEY_LEFT, keep_walking, &left);
+	tb_key_handle_release(KEY_RIGHT, stop_walking, &right);
+	tb_key_handle_release(KEY_LEFT, stop_walking, &left);
 	tb_key_listen(TB_LISTEN_BLOCKING);
 
 	tb_screen_restore();

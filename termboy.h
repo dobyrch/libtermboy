@@ -4,20 +4,6 @@
 #include <string.h>
 #include <time.h>
 
-/* TODO: List all keys in enum */
-#define TB_KEY_ESC   0x01
-#define TB_KEY_E     0x12
-#define TB_KEY_A     0x1E
-#define TB_KEY_D     0x20
-#define TB_KEY_F     0x21
-#define TB_KEY_G     0x22
-#define TB_KEY_C     0x2E
-#define TB_KEY_B     0x30
-#define TB_KEY_UP    0x48
-#define TB_KEY_LEFT  0x4B
-#define TB_KEY_RIGHT 0x4D
-#define TB_KEY_DOWN  0x50
-
 /* TODO: Switch macros to inline functions? */
 #define TB_SPRITE_COLOR(sprite, x, y) \
 	((sprite).colors[(y)*((sprite).width) + (x)])

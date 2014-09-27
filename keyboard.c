@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <termios.h>
 #include <unistd.h>
+#include <linux/input.h>
 #include <linux/kd.h>
 #include <sys/ioctl.h>
 #include "common.h"
@@ -105,7 +106,7 @@ static int key_init(void)
 	CHECK(tcsetattr(STDIN_FILENO, TCSANOW, &tty_attr));
 
 	CHECK(ioctl(STDIN_FILENO, KDGKBMODE, &kbd_mode_orig));
-	CHECK(ioctl(STDIN_FILENO, KDSKBMODE, K_RAW));
+	CHECK(ioctl(STDIN_FILENO, KDSKBMODE, K_MEDIUMRAW));
 
 	rawmode = 1;
 	return 0;
@@ -164,7 +165,7 @@ static void *key_listen_helper(void *arg)
 			}
 			pressed[key] = 1;
 		}
-	} while (key != TB_KEY_ESC);
+	} while (key != KEY_ESC);
 
 	tb_key_restore();
 
