@@ -43,6 +43,9 @@ int tb_screen_init(int pixel_size)
 		orig_font.charcount = 1024;
 		orig_font.data = orig_font_data;
 		CHECK(ioctl(tty_fd, KDFONTOP, &orig_font));
+
+		if (isatty(fileno(stderr)))
+			freopen("/dev/null", "w", stderr);
 	}
 
 	if (pixel_mode != pixel_size) {
@@ -91,6 +94,7 @@ int tb_screen_restore(void)
 	return 0;
 }
 
+/* TODO: Always put coords last? */
 int tb_screen_put(int x, int y, enum tb_color color)
 {
 	static int lastx = -1, lasty = -1;
