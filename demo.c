@@ -22,17 +22,19 @@ int main(void)
 	tb_screen_init(4);
 	tb_screen_size(&width, &height);
 
-	tb_screen_color(0, 0x000000);
-	tb_screen_color(1, 0x04262E);
-	tb_screen_color(2, 0x316034);
-	tb_screen_color(3, 0x6A75C0);
-	tb_screen_color(4, 0x452112);
-	tb_screen_color(5, 0x625727);
-	tb_screen_color(6, 0xE0A962);
-	tb_screen_color(7, 0xFFF2BF);
-	tb_screen_color(8, 0xD59470);
-	tb_screen_color(9, 0x9A5A77);
+	tb_screen_color(0,  0x000000);
+	tb_screen_color(1,  0x04262E);
+	tb_screen_color(2,  0x316034);
+	tb_screen_color(3,  0x6A75C0);
+	tb_screen_color(4,  0x452112);
+	tb_screen_color(5,  0x625727);
+	tb_screen_color(6,  0xE0A962);
+	tb_screen_color(7,  0xFFF2BF);
+	tb_screen_color(8,  0xD59470);
+	tb_screen_color(9,  0x9A5A77);
 	tb_screen_color(10, 0xFFFFFF);
+	tb_screen_color(11, 0xF7C0B1);
+	tb_screen_color(12, 0X1F7531);
 
 	tb_sprite_init(&fill0, 1, 1);
 	TB_SPRITE_COLOR(fill0, 0, 0) = 3;
@@ -43,8 +45,8 @@ int main(void)
 	mountains.tile = TB_TILE_HORIZONTAL;
 	mountains.y = 20;
 
-	tb_sprite_init(&fill1, 1, 10);
-	for (y = 0; y < 10; ++y)
+	tb_sprite_init(&fill1, 1, 25);
+	for (y = 0; y < 25; ++y)
 		TB_SPRITE_COLOR(fill1, 0, y) = 1;
 	fill1.tile = TB_TILE_HORIZONTAL;
 	fill1.y = 27;
@@ -52,23 +54,23 @@ int main(void)
 	tb_sprite_init(&trees, 64, 26);
 	TB_SPRITE_FILL(trees, TREES);
 	trees.tile = TB_TILE_HORIZONTAL;
-	trees.y = 37;
+	trees.y = 52;
 
-	tb_sprite_init(&fill2, 1, 10);
-	for (y = 0; y < 10; ++y)
+	tb_sprite_init(&fill2, 1, 25);
+	for (y = 0; y < 25; ++y)
 		TB_SPRITE_COLOR(fill2, 0, y) = 7;
 	fill2.tile = TB_TILE_HORIZONTAL;
-	fill2.y = 63;
+	fill2.y = 78;
 
 	tb_sprite_init(&waves, 64, 31);
 	TB_SPRITE_FILL(waves, WAVES0);
-	waves.y = 73;
+	waves.y = 103;
 	waves.tile = TB_TILE_HORIZONTAL;
 
 	tb_sprite_init(&player, 14, 16);
 	TB_SPRITE_FILL(player, LINK_STAND_RIGHT);
 	player.x = width/2 - 7;
-	player.y = 56;
+	player.y = 80;
 	player.layer = 1;
 
 	tb_sprite_add(&fill0);
