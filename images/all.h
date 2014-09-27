@@ -1,0 +1,8 @@
+#include "mountains.h"
+#include "trees.h"
+#include "waves0.h"
+#include "waves1.h"
+#include "waves2.h"
+#include "waves3.h"
+#include "link_right_stand.h"
+#include "link_right_walk.h"
