@@ -5,19 +5,22 @@
 #include "termboy.h"
 #include "images/all.h"
 
-void handler(int sig);
+void *start_walking(void *arg);
 void *keep_walking(void *arg);
+void *stop_walking(void *arg);
+void handler(int sig);
 
-static struct tb_sprite mountains, trees, waves, fill0, fill1, fill2;
-static struct tb_animation waves_anim;
+static struct tb_sprite player, mountains, trees, waves, fill0, fill1, fill2;
+static struct tb_animation walk_right, walk_left, waves_anim;
 
 int main(void)
 {
-	int y, left = -1, right = 1;
+	int y, width, height, left = -1, right = 1;
 
 	signal(SIGABRT, handler);
 	signal(SIGSEGV, handler);
 	tb_screen_init(4);
+	tb_screen_size(&width, &height);
 
 	tb_screen_color(0, 0x000000);
 	tb_screen_color(1, 0x04262E);
@@ -62,12 +65,27 @@ int main(void)
 	waves.y = 73;
 	waves.tile = TB_TILE_HORIZONTAL;
 
+	tb_sprite_init(&player, 14, 16);
+	TB_SPRITE_FILL(player, LINK_STAND_RIGHT);
+	player.x = width/2 - 7;
+	player.y = 56;
+	player.layer = 1;
+
 	tb_sprite_add(&fill0);
 	tb_sprite_add(&mountains);
 	tb_sprite_add(&fill1);
 	tb_sprite_add(&trees);
 	tb_sprite_add(&fill2);
 	tb_sprite_add(&waves);
+	tb_sprite_add(&player);
+
+	tb_animation_init(&walk_right, &player, 2);
+	tb_animation_add_frame(&walk_right, LINK_WALK_RIGHT, 150);
+	tb_animation_add_frame(&walk_right, LINK_STAND_RIGHT, 150);
+
+	tb_animation_init(&walk_left, &player, 2);
+	tb_animation_add_frame(&walk_left, LINK_WALK_LEFT, 150);
+	tb_animation_add_frame(&walk_left, LINK_STAND_LEFT, 150);
 
 	tb_animation_init(&waves_anim, &waves, 6);
 	tb_animation_add_frame(&waves_anim, WAVES0, 600);
@@ -78,8 +96,12 @@ int main(void)
 	tb_animation_add_frame(&waves_anim, WAVES1, 200);
 	tb_animation_start(&waves_anim);
 
+	tb_key_handle_press(TB_KEY_RIGHT, start_walking, &right);
+	tb_key_handle_press(TB_KEY_LEFT, start_walking, &left);
 	tb_key_handle_hold(TB_KEY_RIGHT, keep_walking, &right);
 	tb_key_handle_hold(TB_KEY_LEFT, keep_walking, &left);
+	tb_key_handle_release(TB_KEY_RIGHT, stop_walking, &right);
+	tb_key_handle_release(TB_KEY_LEFT, stop_walking, &left);
 	tb_key_listen(TB_LISTEN_BLOCKING);
 
 	tb_screen_restore();
@@ -87,13 +109,42 @@ int main(void)
 	return EXIT_SUCCESS;
 }
 
+void *start_walking(void *arg)
+{
+	int dir = *(int *)arg;
+
+	if (dir == 1)
+		tb_animation_start(&walk_right);
+	else
+		tb_animation_start(&walk_left);
+
+	return NULL;
+}
+
 void *keep_walking(void *arg)
 {
 	int dir = *(int *)arg;
+
 	tb_sprite_move(&waves, waves.x - 3*dir, waves.y);
 	tb_sprite_move(&trees, trees.x - 2*dir, trees.y);
 	tb_sprite_move(&mountains, mountains.x - 1*dir, mountains.y);
 	TB_MILLISLEEP(30);
+
+	return NULL;
+}
+
+void *stop_walking(void *arg)
+{
+	int dir = *(int *)arg;
+
+	if (dir == 1) {
+		tb_animation_stop(&walk_right);
+		TB_SPRITE_FILL(player, LINK_STAND_RIGHT);
+	} else {
+		tb_animation_stop(&walk_left);
+		TB_SPRITE_FILL(player, LINK_STAND_LEFT);
+	}
+	tb_sprite_redraw(&player);
 
 	return NULL;
 }
