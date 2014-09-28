@@ -193,14 +193,10 @@ void *stop_walking(void *arg)
 {
 	int dir = *(int *)arg;
 
-	if (dir == 1) {
+	if (dir == 1)
 		tb_animation_stop(&walk_right);
-		TB_SPRITE_FILL(player, LINK_STAND_RIGHT);
-	} else {
+	else
 		tb_animation_stop(&walk_left);
-		TB_SPRITE_FILL(player, LINK_STAND_LEFT);
-	}
-	tb_sprite_redraw(&player);
 
 	return NULL;
 }

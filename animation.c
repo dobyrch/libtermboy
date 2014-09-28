@@ -21,6 +21,9 @@ int tb_animation_init(struct tb_animation *animation, struct tb_sprite *sprite, 
 
 int tb_animation_add_frame(struct tb_animation *animation, enum tb_color *colors, int delay_ms)
 {
+	if (animation->_frames == animation->frames)
+		return -1;
+
 	animation->delays[animation->_frames] = delay_ms;
 	animation->data[animation->_frames] = colors;
 	++animation->_frames;
@@ -37,7 +40,12 @@ int tb_animation_start(struct tb_animation *animation)
 
 int tb_animation_stop(struct tb_animation *animation)
 {
+	struct tb_sprite sprite = *animation->sprite;
+	enum tb_color *colors = animation->data[animation->_frames - 1];
+
 	pthread_cancel(animation->_thread);
+	TB_SPRITE_FILL(sprite, colors);
+	tb_sprite_redraw(&sprite);
 
 	return 0;
 }
