@@ -76,7 +76,7 @@ void tb_key_handle_hold(int key, void *(*handler)(void *), void *args);
 
 struct tb_sprite *tb_sprite_background(void);
 int tb_sprite_init(struct tb_sprite *sprite, int width, int height);
-int tb_sprite_add(struct tb_sprite *sprite);
+int tb_sprite_show(struct tb_sprite *sprite);
 int tb_sprite_move(struct tb_sprite *sprite, int x, int y);
 int tb_sprite_redraw(struct tb_sprite *sprite);
 

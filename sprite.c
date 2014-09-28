@@ -33,8 +33,8 @@ int tb_sprite_init(struct tb_sprite *sprite, int width, int height)
 	return 0;
 }
 
-/* TODO: Rename to 'tb_sprite_show' and add a 'tb_sprite_hide' function */
-int tb_sprite_add(struct tb_sprite *sprite)
+/* TODO: Add a 'tb_sprite_hide' function */
+int tb_sprite_show(struct tb_sprite *sprite)
 {
 	struct sprite_listnode *curr_node, *next_node, *new_node;
 	pthread_mutex_lock(&list_lock);

@@ -18,11 +18,31 @@ int main(void)
 {
 	int y, width, height, left = -1, right = 1;
 
+	/*
+	 * It's a good idea to handle fatal signals so we have a chance
+	 * to clean up the screen if something goes wrong.
+	 */
 	signal(SIGABRT, handler);
 	signal(SIGSEGV, handler);
-	tb_screen_init(4);
+
+	/*
+	 * tb_screen_init must be called before attempting to draw
+	 * anything.  It accepts a value (between 1 and 8) indicating
+	 * how large the pixels should appear.
+	 */
+	if (tb_screen_init(4) != 0) {
+		printf("This libtermboy demo must be run in a Linux "
+			"virtual console.\n(Try pressing CTRL+ALT+F2)\n");
+		exit(EXIT_FAILURE);
+	}
+
+	/* Retrieve the current screen dimensions */
 	tb_screen_size(&width, &height);
 
+	/*
+	 * Colors values can be redefined to whatever we want.
+	 * Sixteen colors are available.
+	 */
 	tb_screen_color(0,  0x000000);
 	tb_screen_color(1,  0x04262E);
 	tb_screen_color(2,  0x316034);
@@ -37,11 +57,24 @@ int main(void)
 	tb_screen_color(11, 0xF7C0B1);
 	tb_screen_color(12, 0X1F7531);
 
+	/* Initialize a new sprite with the specified dimensions */
 	tb_sprite_init(&fill0, 1, 1);
+
+	/* TB_SPRITE_COLOR can get or set a sprite's color at a
+	 * particular position.  Note that, unlike tb_sprite_init, it
+	 * does *not* accept a pointer argument (because it is
+	 * implemented as a macro)
+	 */
 	TB_SPRITE_COLOR(fill0, 0, 0) = 3;
+
+	/*
+	 * Sprites can be tiled horizontally, vertically, or both;
+	 * the pattern will be repeated across the entire screen.
+	 */
 	fill0.tile = TB_TILE_HORIZONTAL | TB_TILE_VERTICAL;
 
 	tb_sprite_init(&mountains, 64, 7);
+	/* Copy sprite data from an array of colors */
 	TB_SPRITE_FILL(mountains, MOUNTAINS);
 	mountains.tile = TB_TILE_HORIZONTAL;
 	mountains.y = 20;
@@ -50,6 +83,7 @@ int main(void)
 	for (y = 0; y < 25; ++y)
 		TB_SPRITE_COLOR(fill1, 0, y) = 1;
 	fill1.tile = TB_TILE_HORIZONTAL;
+	/* The position of a sprite can be adjusted by setting x or y */
 	fill1.y = 27;
 
 	tb_sprite_init(&trees, 64, 26);
@@ -72,17 +106,25 @@ int main(void)
 	TB_SPRITE_FILL(player, LINK_STAND_RIGHT);
 	player.x = width/2 - 7;
 	player.y = 80;
+	/* Sprites on higher layers are drawn on top of lower layers */
 	player.layer = 1;
 
-	tb_sprite_add(&fill0);
-	tb_sprite_add(&mountains);
-	tb_sprite_add(&fill1);
-	tb_sprite_add(&trees);
-	tb_sprite_add(&fill2);
-	tb_sprite_add(&waves);
-	tb_sprite_add(&player);
+	/* Make all of our sprites visible */
+	tb_sprite_show(&fill0);
+	tb_sprite_show(&mountains);
+	tb_sprite_show(&fill1);
+	tb_sprite_show(&trees);
+	tb_sprite_show(&fill2);
+	tb_sprite_show(&waves);
+	tb_sprite_show(&player);
 
+	/*
+	 * Initialize a new animation for the specified sprite
+	 * with the given number of frames
+	 */
 	tb_animation_init(&walk_right, &player, 2);
+
+	/* Add a new frame to be shown for 150 milliseconds */
 	tb_animation_add_frame(&walk_right, LINK_WALK_RIGHT, 150);
 	tb_animation_add_frame(&walk_right, LINK_STAND_RIGHT, 150);
 
@@ -99,14 +141,25 @@ int main(void)
 	tb_animation_add_frame(&waves_anim, WAVES1, 200);
 	tb_animation_start(&waves_anim);
 
+	/*
+	 * Register functions to be called (on separate threads) when
+	 * certain key events occur. Keys are defined in linux/input.h.
+	 */
 	tb_key_handle_press(KEY_RIGHT, start_walking, &right);
 	tb_key_handle_press(KEY_LEFT, start_walking, &left);
 	tb_key_handle_hold(KEY_RIGHT, keep_walking, &right);
 	tb_key_handle_hold(KEY_LEFT, keep_walking, &left);
 	tb_key_handle_release(KEY_RIGHT, stop_walking, &right);
 	tb_key_handle_release(KEY_LEFT, stop_walking, &left);
+
+	/*
+	 * Begin listening for key events.  This call will block until
+	 * the user presses the escape key.  TB_LISTEN_NONBLOCKING can
+	 * be used instead if you wish to use your own event loop.
+	 */
 	tb_key_listen(TB_LISTEN_BLOCKING);
 
+	/* Make sure to restore the screen before exiting the program */
 	tb_screen_restore();
 
 	return EXIT_SUCCESS;
