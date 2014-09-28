@@ -12,7 +12,7 @@
 
 #define MAX_FONT_SIZE 65536
 #define BYTES_PER_CHAR 32
-#define MAGIC_CHAR '*'
+#define MAGIC_CHAR ' '
 
 static void screen_clear(void);
 static void screen_showcursor(int visible);
