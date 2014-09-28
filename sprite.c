@@ -63,8 +63,8 @@ int tb_sprite_show(struct tb_sprite *sprite)
 
 		if (sprite->layer < curr_node->sprite->layer &&
 		    sprite->layer >= next_node->sprite->layer) {
-			curr_node->next = new_node;
 			new_node->next = next_node;
+			curr_node->next = new_node;
 			goto success;
 		}
 
