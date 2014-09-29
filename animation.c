@@ -67,4 +67,6 @@ static void *animate(void *arg)
 		TB_MILLISLEEP(animation->delays[i]);
 		i = (i + 1) % animation->frames;
 	}
+
+	return NULL;
 }
