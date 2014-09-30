@@ -1,8 +1,8 @@
 CC = clang
 OUT_DIR = out
 SRC_DIR = src
-PIX_DIR = src/pixmaps
-CFLAGS = -Wall -I$(SRC_DIR) -fPIC -g
+PIX_DIR = $(SRC_DIR)/pixmaps
+CFLAGS = -I$(SRC_DIR) -fPIC -g -O -Wall
 LDFLAGS = -L$(OUT_DIR)
 LDLIBS = -lpthread -ltermboy
 _OBJECTS = keyboard screen sprite animation
