@@ -1,6 +1,8 @@
 CC = clang
 OUT_DIR = out
-CFLAGS = -Wall -fPIC -g
+SRC_DIR = src
+PIX_DIR = src/pixmaps
+CFLAGS = -Wall -I$(SRC_DIR) -fPIC -g
 LDFLAGS = -L$(OUT_DIR)
 LDLIBS = -lpthread -ltermboy
 _OBJECTS = keyboard screen sprite animation
@@ -9,16 +11,16 @@ OBJECTS = $(patsubst %,$(OUT_DIR)/%.o,$(_OBJECTS))
 LIBTERMBOY = $(OUT_DIR)/libtermboy.so
 DEMO = $(OUT_DIR)/demo
 
-$(DEMO): demo.c images/*.h $(LIBTERMBOY)
+$(DEMO): $(SRC_DIR)/demo.c $(PIX_DIR)/*.h $(LIBTERMBOY)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(LDLIBS) $< -o $@
 
 $(LIBTERMBOY): $(OBJECTS)
 	$(CC) -shared $^ -o $@
 
-$(OUT_DIR)/%.o: %.c *.h
+$(OUT_DIR)/%.o: $(SRC_DIR)/%.c $(SRC_DIR)/*.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
-tags: *.c *.h
+tags: $(SRC_DIR)/*
 	ctags $^
 
 .PHONY: run

@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <linux/input.h>
-#include "termboy.h"
-#include "images/all.h"
+#include <termboy.h>
+#include "pixmaps/all.h"
 
 void *start_walking(void *arg);
 void *keep_walking(void *arg);
