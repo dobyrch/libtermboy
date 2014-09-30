@@ -63,7 +63,7 @@ static void *animate(void *arg)
 		/* TODO: Assign pointer instead of copying? */
 		TB_SPRITE_FILL(sprite, colors);
 		tb_sprite_redraw(&sprite);
-		
+
 		TB_MILLISLEEP(animation->delays[i]);
 		i = (i + 1) % animation->frames;
 	}
