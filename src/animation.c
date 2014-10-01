@@ -40,6 +40,7 @@ int tb_animation_add_frame(struct tb_animation *animation, enum tb_color *colors
 int tb_animation_start(struct tb_animation *animation)
 {
 	pthread_create(&animation->_thread, NULL, animate, animation);
+	pthread_detach(animation->_thread);
 
 	return 0;
 }

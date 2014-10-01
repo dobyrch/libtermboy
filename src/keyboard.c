@@ -28,22 +28,16 @@ static pthread_t hold_threads[128];
 int tb_key_listen(enum tb_listen_mode mode)
 {
 	pthread_t thread;
-	pthread_attr_t attr;
 
 	/* TODO: Error handling */
-	if (mode == TB_LISTEN_BLOCKING) {
-		pthread_create(&thread, NULL, key_listen_helper, NULL);
-		pthread_join(thread, NULL);
-		return 0;
-	} else if (mode == TB_LISTEN_NONBLOCKING) {
-		pthread_attr_init(&attr);
-		pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-		pthread_create(&thread, &attr, key_listen_helper, NULL);
-		pthread_attr_destroy(&attr);
-		return 0;
-	}
+	pthread_create(&thread, NULL, key_listen_helper, NULL);
 
-	return -1;
+	if (mode == TB_LISTEN_BLOCKING)
+		pthread_join(thread, NULL);
+	else
+		pthread_detach(thread);
+
+	return 0;
 }
 
 int tb_key_pressed(int key)
@@ -159,7 +153,7 @@ static void *key_listen_helper(void *arg)
 						press_args[key]);
 			}
 			if (hold_handlers[key]) {
-				pthread_create(&hold_threads[key], NULL,
+				pthread_create(&hold_threads[key], &attr,
 						repeat,
 						&fixed_ints[key]);
 			}
