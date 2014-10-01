@@ -33,6 +33,11 @@ int tb_sprite_init(struct tb_sprite *sprite, int width, int height)
 	return 0;
 }
 
+void tb_sprite_del(struct tb_sprite *sprite)
+{
+	free(sprite->colors);
+}
+
 /* TODO: Add a 'tb_sprite_hide' function */
 int tb_sprite_show(struct tb_sprite *sprite)
 {

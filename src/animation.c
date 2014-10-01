@@ -19,6 +19,12 @@ int tb_animation_init(struct tb_animation *animation, struct tb_sprite *sprite, 
 	return 0;
 }
 
+void tb_animation_del(struct tb_animation *animation)
+{
+	free(animation->delays);
+	free(animation->data);
+}
+
 int tb_animation_add_frame(struct tb_animation *animation, enum tb_color *colors, int delay_ms)
 {
 	if (animation->_frames == animation->frames)

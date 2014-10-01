@@ -162,6 +162,18 @@ int main(void)
 	/* Make sure to restore the screen before exiting the program */
 	tb_screen_restore();
 
+	/* Free all of the memory allocated for our "objects" */
+	tb_sprite_del(&player);
+	tb_sprite_del(&mountains);
+	tb_sprite_del(&trees);
+	tb_sprite_del(&waves);
+	tb_sprite_del(&fill0);
+	tb_sprite_del(&fill1);
+	tb_sprite_del(&fill2);
+	tb_animation_del(&walk_right);
+	tb_animation_del(&walk_left);
+	tb_animation_del(&waves_anim);
+
 	return EXIT_SUCCESS;
 }
 
