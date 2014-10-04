@@ -1,7 +1,6 @@
 CC = clang
 OUT_DIR = out
 SRC_DIR = src
-PIX_DIR = $(SRC_DIR)/pixmaps
 CFLAGS = -I$(SRC_DIR) -fPIC -g -O -Wall
 LDFLAGS = -L$(OUT_DIR)
 LDLIBS = -lpthread -ltermboy
@@ -11,7 +10,7 @@ OBJECTS = $(patsubst %,$(OUT_DIR)/%.o,$(_OBJECTS))
 LIBTERMBOY = $(OUT_DIR)/libtermboy.so
 DEMO = $(OUT_DIR)/demo
 
-$(DEMO): $(SRC_DIR)/demo.c $(PIX_DIR)/*.h $(LIBTERMBOY)
+$(DEMO): $(SRC_DIR)/demo.c $(SRC_DIR)/pixmaps/*.h $(LIBTERMBOY)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(LDLIBS) $< -o $@
 
 $(LIBTERMBOY): $(OBJECTS)
