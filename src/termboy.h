@@ -2,7 +2,7 @@
 
 #include <pthread.h>
 #include <string.h>
-#include <time.h>
+#include <unistd.h>
 
 /* TODO: Switch macros to inline functions? */
 #define TB_SPRITE_COLOR(sprite, x, y) \
@@ -14,10 +14,7 @@
 
 #define TB_MILLISLEEP(ms) \
 	do { \
-		struct timespec ts; \
-		ts.tv_sec = (ms) / 1000; \
-		ts.tv_nsec = (ms % 1000) * 1000000; \
-		nanosleep(&ts, NULL); \
+		usleep(ms*1000); \
 	} while (0)
 
 #define TB_BEEP(frequency, duration) \
@@ -25,7 +22,7 @@
 		printf("\e[10;%d]\e[11;%d]\a", frequency, duration); \
 		fflush(stdout); \
 		TB_MILLISLEEP(duration); \
- 	} while (0)
+	} while (0)
 
 enum tb_color {
 	TB_COLOR_BLACK, TB_COLOR_RED, TB_COLOR_GREEN, TB_COLOR_YELLOW,
