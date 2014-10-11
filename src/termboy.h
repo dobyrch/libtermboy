@@ -20,6 +20,13 @@
 		nanosleep(&ts, NULL); \
 	} while (0)
 
+#define TB_BEEP(frequency, duration) \
+	do { \
+		printf("\e[10;%d]\e[11;%d]\a", frequency, duration); \
+		fflush(stdout); \
+		TB_MILLISLEEP(duration); \
+ 	} while (0)
+
 enum tb_color {
 	TB_COLOR_BLACK, TB_COLOR_RED, TB_COLOR_GREEN, TB_COLOR_YELLOW,
 	TB_COLOR_BLUE, TB_COLOR_MAGENTA, TB_COLOR_CYAN, TB_COLOR_WHITE,

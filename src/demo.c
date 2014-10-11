@@ -9,6 +9,7 @@
 void *start_walking(void *arg);
 void *keep_walking(void *arg);
 void *stop_walking(void *arg);
+void *play_ocarina(void *arg);
 void handler(int sig);
 
 static struct tb_sprite player, mountains, trees, waves, fill0, fill1, fill2;
@@ -151,6 +152,13 @@ int main(void)
 	tb_key_handle_hold(KEY_LEFT, keep_walking, &left);
 	tb_key_handle_release(KEY_RIGHT, stop_walking, &right);
 	tb_key_handle_release(KEY_LEFT, stop_walking, &left);
+	tb_key_handle_hold(KEY_A, play_ocarina, "A");
+	tb_key_handle_hold(KEY_B, play_ocarina, "B");
+	tb_key_handle_hold(KEY_C, play_ocarina, "C");
+	tb_key_handle_hold(KEY_D, play_ocarina, "D");
+	tb_key_handle_hold(KEY_E, play_ocarina, "E");
+	tb_key_handle_hold(KEY_F, play_ocarina, "F");
+	tb_key_handle_hold(KEY_G, play_ocarina, "G");
 
 	/*
 	 * Begin listening for key events.  This call will block until
@@ -209,6 +217,39 @@ void *stop_walking(void *arg)
 		tb_animation_stop(&walk_right);
 	else
 		tb_animation_stop(&walk_left);
+
+	return NULL;
+}
+
+void *play_ocarina(void *arg)
+{
+	char note = *(char *)arg;
+	int frequency;
+
+	switch (note) {
+	case 'A':
+		frequency = 440;
+		break;
+	case 'B':
+		frequency = 494;
+		break;
+	case 'C':
+		frequency = 262;
+		break;
+	case 'D':
+		frequency = 294;
+		break;
+	case 'E':
+		frequency = 330;
+		break;
+	case 'F':
+		frequency = 349;
+		break;
+	case 'G':
+		frequency = 392;
+		break;
+	}
+	TB_BEEP(frequency, 300);
 
 	return NULL;
 }
