@@ -1,0 +1,64 @@
+.Dd October 11, 2014
+.Dt TERMBOY_SCREEN \&3 "Linux Programmer's Manual"
+.Os Linux
+.Sh NAME
+.Nm termboy_screen
+.Nd graphics routines for text mode consoles
+.Sh SYNOPSIS
+.In termboy.h
+.Fn "int tb_screen_init" "int pixel_size"
+.Fn "void tb_screen_size" "int *width" "int *height"
+.Fn "void tb_screen_color" "enum tb_color color" "int value"
+.Fn "int tb_screen_put" "int x" "int y" "enum tb_color color"
+.Fn "int tb_screen_flush" "void"
+.Fn "int tb_screen_restore" "void"
+.Sh DESCRIPTION
+Before drawing anything to the screen,
+.Fn tb_screen_init
+must be called to initialize the display. It accepts a single argument,
+.Fa pixel_size ,
+which specifies the height and width of the displayed pixels (measured in
+physical pixels).  Valid values range between 1 and 8.
+.Pp
+.Fn tb_screen_size
+stores the current screen dimensions in the integers pointed to by
+.Fa width
+and
+.Fa height .
+If the screen has not yet been initialized, both dimensions will be set to
+zero.
+.Pp
+The Linux console is capable of displaying sixteen distinct colors, which can
+be customized by calling
+.Fn tb_screen_color .
+The
+.Fa color
+argument refers to one of the sixteen colors to be redefined, such as
+.Dv TB_COLOR_RED .
+Its color content will be set according to the 24-bit RGB
+.Fa value .
+.Pp
+To draw a pixel on the screen, call
+.Fn tb_screen_put
+with the desired coordinates and color of the pixel.
+.Fa x
+and
+.Fa y
+specify the location of the pixel relative to the top-left corner of the
+screen.
+.Pp
+For performance reasons, draws to the screen are buffered.  As a result,
+newly drawn pixels will not necessarily be immediately visible.  Calling
+.Fn tb_screen_flush
+will force the screen to be updated.
+.Pp
+All programs should be sure to call
+.Fn tb_screen_restore
+before exiting.  If a program happens to crash before it has a chance to
+restore the screen, the
+.Xr setfont 8
+command can be run from a "blind" state to make the tty usable again.
+.Sh RETURN VALUE
+On success, these functions return zero.  Functions with a
+.Ft void
+return type will always succeed.

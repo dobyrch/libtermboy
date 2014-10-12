@@ -77,21 +77,15 @@ int tb_screen_init(int pixel_size)
 	return 0;
 }
 
-int tb_screen_restore(void)
+void tb_screen_size(int *width, int *height)
 {
-	if (pixel_mode) {
-		screen_showcursor(1);
-		screen_clear();
-		size.ws_col = size.ws_row = 0;
-		free(color_map);
+	*width = size.ws_col;
+	*height = size.ws_row;
+}
 
-		orig_font.op = KD_FONT_OP_SET;
-		CHECK(ioctl(tty_fd, KDFONTOP, &orig_font));
-		CHECK(close(tty_fd));
-		pixel_mode = 0;
-	}
-
-	return 0;
+void tb_screen_color(enum tb_color color, int value)
+{
+	printf("\e]P%X%.6X", color, value);
 }
 
 /* TODO: Always put coords last? */
@@ -121,20 +115,26 @@ int tb_screen_put(int x, int y, enum tb_color color)
 	return 0;
 }
 
-void tb_screen_color(enum tb_color color, int value)
+int tb_screen_flush(void)
 {
-	printf("\e]P%X%.6X", color, value);
+	return fflush(stdout);
 }
 
-void tb_screen_flush(void)
+int tb_screen_restore(void)
 {
-	fflush(stdout);
-}
+	if (pixel_mode) {
+		screen_showcursor(1);
+		screen_clear();
+		size.ws_col = size.ws_row = 0;
+		free(color_map);
 
-void tb_screen_size(int *width, int *height)
-{
-	*width = size.ws_col;
-	*height = size.ws_row;
+		orig_font.op = KD_FONT_OP_SET;
+		CHECK(ioctl(tty_fd, KDFONTOP, &orig_font));
+		CHECK(close(tty_fd));
+		pixel_mode = 0;
+	}
+
+	return 0;
 }
 
 static void screen_clear(void)

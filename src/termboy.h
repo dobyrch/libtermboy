@@ -61,11 +61,11 @@ struct tb_animation {
 };
 
 int tb_screen_init(int pixel_size);
-int tb_screen_restore(void);
-int tb_screen_put(int x, int y, enum tb_color color);
-void tb_screen_color(enum tb_color color, int value);
-void tb_screen_flush(void);
 void tb_screen_size(int *width, int *height);
+void tb_screen_color(enum tb_color color, int value);
+int tb_screen_put(int x, int y, enum tb_color color);
+int tb_screen_flush(void);
+int tb_screen_restore(void);
 
 int tb_key_listen(enum tb_listen_mode);
 int tb_key_restore(void);
