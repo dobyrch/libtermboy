@@ -204,7 +204,7 @@ void *keep_walking(void *arg)
 	tb_sprite_move(&waves, waves.x - 3*dir, waves.y);
 	tb_sprite_move(&trees, trees.x - 2*dir, trees.y);
 	tb_sprite_move(&mountains, mountains.x - 1*dir, mountains.y);
-	TB_MILLISLEEP(30);
+	tb_msleep(30);
 
 	return NULL;
 }
@@ -249,7 +249,7 @@ void *play_ocarina(void *arg)
 		frequency = 392;
 		break;
 	}
-	TB_BEEP(frequency, 300);
+	tb_beep(frequency, 300);
 
 	return NULL;
 }

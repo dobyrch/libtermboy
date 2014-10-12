@@ -4,7 +4,7 @@ SRC_DIR = src
 CFLAGS = -I$(SRC_DIR) -fPIC -g -O -Wall
 LDFLAGS = -L$(OUT_DIR)
 LDLIBS = -lpthread -ltermboy
-_OBJECTS = keyboard screen sprite animation
+_OBJECTS = keyboard screen sprite animation misc
 
 OBJECTS = $(patsubst %,$(OUT_DIR)/%.o,$(_OBJECTS))
 LIBTERMBOY = $(OUT_DIR)/libtermboy.so

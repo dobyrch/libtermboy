@@ -71,7 +71,7 @@ static void *animate(void *arg)
 		TB_SPRITE_FILL(sprite, colors);
 		tb_sprite_redraw(&sprite);
 
-		TB_MILLISLEEP(animation->delays[i]);
+		tb_msleep(animation->delays[i]);
 		i = (i + 1) % animation->frames;
 	}
 
