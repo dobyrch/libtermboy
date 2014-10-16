@@ -1,4 +1,4 @@
-#TODO: see also faulthandler module
+#TODO: see faulthandler module
 from ctypes import byref, c_int, c_void_p, CDLL, CFUNCTYPE
 from enum import Enum, IntEnum
 from functools import partial
@@ -60,4 +60,4 @@ class Keyboard():
 		def callback(dummy):
 			handler(*args, **kwargs)
 		self.callbacks.append(callback)
-		clib.tb_key_handle_press(0x4D, callback, None)
+		clib.tb_key_handle_press(key, callback, None)
