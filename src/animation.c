@@ -72,7 +72,7 @@ static void *animate(void *arg)
 		tb_sprite_redraw(&sprite);
 
 		tb_msleep(animation->delays[i]);
-		i = (i + 1) % animation->frames;
+		i = (i + 1) % animation->_frames;
 	}
 
 	return NULL;
