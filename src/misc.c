@@ -24,14 +24,14 @@ int tb_beep(int frequency, int duration)
 
 int tb_tone_start(int frequency)
 {
-	CHECK(ioctl(STDOUT_FILENO, KIOCSOUND, CLOCK_TICK_RATE/frequency));
+	FAILIF(ioctl(STDOUT_FILENO, KIOCSOUND, CLOCK_TICK_RATE/frequency));
 
 	return 0;
 }
 
 int tb_tone_stop(void)
 {
-	CHECK(ioctl(STDOUT_FILENO, KIOCSOUND, 0));
+	FAILIF(ioctl(STDOUT_FILENO, KIOCSOUND, 0));
 
 	return 0;
 }

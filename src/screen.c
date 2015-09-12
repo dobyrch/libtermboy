@@ -36,13 +36,13 @@ int tb_screen_init(int pixel_size)
 		return -1;
 
 	if (!pixel_mode) {
-		CHECK(tty_fd = open("/dev/tty", O_RDONLY));
+		FAILIF(tty_fd = open("/dev/tty", O_RDONLY));
 		orig_font.op = KD_FONT_OP_GET;
 		orig_font.flags = 0;
 		orig_font.width = orig_font.height = 32;
 		orig_font.charcount = 1024;
 		orig_font.data = orig_font_data;
-		CHECK(ioctl(tty_fd, KDFONTOP, &orig_font));
+		FAILIF(ioctl(tty_fd, KDFONTOP, &orig_font));
 
 		if (isatty(fileno(stderr)))
 			freopen("/dev/null", "w", stderr);
@@ -58,10 +58,10 @@ int tb_screen_init(int pixel_size)
 		new_font.height = pixel_size;
 		new_font.charcount = 256;
 		new_font.data = new_font_data;
-		CHECK(ioctl(tty_fd, KDFONTOP, &new_font));
+		FAILIF(ioctl(tty_fd, KDFONTOP, &new_font));
 
 		pixel_mode = pixel_size;
-		CHECK(ioctl(tty_fd, TIOCGWINSZ, &size));
+		FAILIF(ioctl(tty_fd, TIOCGWINSZ, &size));
 		free(color_map);
 		color_map = calloc(sizeof(char), size.ws_col*size.ws_row);
 		if (color_map == NULL) {
@@ -129,8 +129,8 @@ int tb_screen_restore(void)
 		free(color_map);
 
 		orig_font.op = KD_FONT_OP_SET;
-		CHECK(ioctl(tty_fd, KDFONTOP, &orig_font));
-		CHECK(close(tty_fd));
+		FAILIF(ioctl(tty_fd, KDFONTOP, &orig_font));
+		FAILIF(close(tty_fd));
 		pixel_mode = 0;
 	}
 
