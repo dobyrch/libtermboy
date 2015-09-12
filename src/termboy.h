@@ -80,3 +80,5 @@ void tb_animation_del(struct tb_animation *animation);
 
 int tb_msleep(int milliseconds);
 int tb_beep(int frequency, int duration);
+int tb_tone_start(int frequency);
+int tb_tone_stop(void);
