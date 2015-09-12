@@ -94,13 +94,13 @@ static int key_init(void)
 	if (rawmode)
 		return 0;
 
-	FAILIF(tcgetattr(STDIN_FILENO, &tty_attr_orig));
+	FAILIF(tcgetattr(STDOUT_FILENO, &tty_attr_orig));
 	tty_attr = tty_attr_orig;
 	cfmakeraw(&tty_attr);
-	FAILIF(tcsetattr(STDIN_FILENO, TCSANOW, &tty_attr));
+	FAILIF(tcsetattr(STDOUT_FILENO, TCSANOW, &tty_attr));
 
-	FAILIF(ioctl(STDIN_FILENO, KDGKBMODE, &kbd_mode_orig));
-	FAILIF(ioctl(STDIN_FILENO, KDSKBMODE, K_MEDIUMRAW));
+	FAILIF(ioctl(STDOUT_FILENO, KDGKBMODE, &kbd_mode_orig));
+	FAILIF(ioctl(STDOUT_FILENO, KDSKBMODE, K_MEDIUMRAW));
 
 	rawmode = 1;
 	return 0;
@@ -109,8 +109,8 @@ static int key_init(void)
 int tb_key_restore(void)
 {
 	if (rawmode) {
-		FAILIF(tcsetattr(STDIN_FILENO, TCSAFLUSH, &tty_attr_orig));
-		FAILIF(ioctl(STDIN_FILENO, KDSKBMODE, kbd_mode_orig));
+		FAILIF(tcsetattr(STDOUT_FILENO, TCSAFLUSH, &tty_attr_orig));
+		FAILIF(ioctl(STDOUT_FILENO, KDSKBMODE, kbd_mode_orig));
 		rawmode = 0;
 	}
 
