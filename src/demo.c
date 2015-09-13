@@ -14,7 +14,7 @@ void *stop_playing(void *arg);
 void handler(int sig);
 
 static struct tb_sprite player, mountains, trees, waves, fill0, fill1, fill2;
-static struct tb_animation walk_right, walk_left, waves_anim;
+static struct tb_anim walk_right, walk_left, waves_anim;
 
 int main(void)
 {
@@ -125,24 +125,24 @@ int main(void)
 	 * Initialize a new animation for the specified sprite
 	 * with the given number of frames
 	 */
-	tb_animation_init(&walk_right, &player, 2);
+	tb_anim_init(&walk_right, &player, 2);
 
 	/* Add a new frame to be shown for 150 milliseconds */
-	tb_animation_add_frame(&walk_right, LINK_WALK_RIGHT, 150);
-	tb_animation_add_frame(&walk_right, LINK_STAND_RIGHT, 150);
+	tb_anim_add_frame(&walk_right, LINK_WALK_RIGHT, 150);
+	tb_anim_add_frame(&walk_right, LINK_STAND_RIGHT, 150);
 
-	tb_animation_init(&walk_left, &player, 2);
-	tb_animation_add_frame(&walk_left, LINK_WALK_LEFT, 150);
-	tb_animation_add_frame(&walk_left, LINK_STAND_LEFT, 150);
+	tb_anim_init(&walk_left, &player, 2);
+	tb_anim_add_frame(&walk_left, LINK_WALK_LEFT, 150);
+	tb_anim_add_frame(&walk_left, LINK_STAND_LEFT, 150);
 
-	tb_animation_init(&waves_anim, &waves, 6);
-	tb_animation_add_frame(&waves_anim, WAVES0, 600);
-	tb_animation_add_frame(&waves_anim, WAVES1, 200);
-	tb_animation_add_frame(&waves_anim, WAVES2, 200);
-	tb_animation_add_frame(&waves_anim, WAVES3, 600);
-	tb_animation_add_frame(&waves_anim, WAVES2, 200);
-	tb_animation_add_frame(&waves_anim, WAVES1, 200);
-	tb_animation_start(&waves_anim);
+	tb_anim_init(&waves_anim, &waves, 6);
+	tb_anim_add_frame(&waves_anim, WAVES0, 600);
+	tb_anim_add_frame(&waves_anim, WAVES1, 200);
+	tb_anim_add_frame(&waves_anim, WAVES2, 200);
+	tb_anim_add_frame(&waves_anim, WAVES3, 600);
+	tb_anim_add_frame(&waves_anim, WAVES2, 200);
+	tb_anim_add_frame(&waves_anim, WAVES1, 200);
+	tb_anim_start(&waves_anim);
 
 	/*
 	 * Register functions to be called (on separate threads) when
@@ -176,9 +176,9 @@ int main(void)
 	tb_sprite_del(&fill0);
 	tb_sprite_del(&fill1);
 	tb_sprite_del(&fill2);
-	tb_animation_del(&walk_right);
-	tb_animation_del(&walk_left);
-	tb_animation_del(&waves_anim);
+	tb_anim_del(&walk_right);
+	tb_anim_del(&walk_left);
+	tb_anim_del(&waves_anim);
 
 	return EXIT_SUCCESS;
 }
@@ -188,9 +188,9 @@ void *start_walking(void *arg)
 	int dir = *(int *)arg;
 
 	if (dir == 1)
-		tb_animation_start(&walk_right);
+		tb_anim_start(&walk_right);
 	else
-		tb_animation_start(&walk_left);
+		tb_anim_start(&walk_left);
 
 	return NULL;
 }
@@ -212,9 +212,9 @@ void *stop_walking(void *arg)
 	int dir = *(int *)arg;
 
 	if (dir == 1)
-		tb_animation_stop(&walk_right);
+		tb_anim_stop(&walk_right);
 	else
-		tb_animation_stop(&walk_left);
+		tb_anim_stop(&walk_left);
 
 	return NULL;
 }

@@ -6,51 +6,50 @@ static void *animate(void *arg);
 
 /*
 TODO: Add destructor
-TODO: Consider abbreviating "animation"
 */
-int tb_animation_init(struct tb_animation *animation, struct tb_sprite *sprite, int frames)
+int tb_anim_init(struct tb_anim *anim, struct tb_sprite *sprite, int frames)
 {
-	animation->sprite = sprite;
-	animation->frames = frames;
-	animation->_frames = 0;
-	animation->delays = calloc(frames, sizeof(int));
-	animation->data = calloc(frames, sizeof(enum tb_color *));
+	anim->sprite = sprite;
+	anim->frames = frames;
+	anim->_frames = 0;
+	anim->delays = calloc(frames, sizeof(int));
+	anim->data = calloc(frames, sizeof(enum tb_color *));
 
 	return 0;
 }
 
-void tb_animation_del(struct tb_animation *animation)
+void tb_anim_del(struct tb_anim *anim)
 {
-	free(animation->delays);
-	free(animation->data);
+	free(anim->delays);
+	free(anim->data);
 }
 
-int tb_animation_add_frame(struct tb_animation *animation, enum tb_color *colors, int delay_ms)
+int tb_anim_add_frame(struct tb_anim *anim, enum tb_color *colors, int delay_ms)
 {
-	if (animation->_frames == animation->frames)
+	if (anim->_frames == anim->frames)
 		return -1;
 
-	animation->delays[animation->_frames] = delay_ms;
-	animation->data[animation->_frames] = colors;
-	++animation->_frames;
+	anim->delays[anim->_frames] = delay_ms;
+	anim->data[anim->_frames] = colors;
+	++anim->_frames;
 
 	return 0;
 }
 
-int tb_animation_start(struct tb_animation *animation)
+int tb_anim_start(struct tb_anim *anim)
 {
-	pthread_create(&animation->_thread, NULL, animate, animation);
-	pthread_detach(animation->_thread);
+	pthread_create(&anim->_thread, NULL, animate, anim);
+	pthread_detach(anim->_thread);
 
 	return 0;
 }
 
-int tb_animation_stop(struct tb_animation *animation)
+int tb_anim_stop(struct tb_anim *anim)
 {
-	struct tb_sprite sprite = *animation->sprite;
-	enum tb_color *colors = animation->data[animation->_frames - 1];
+	struct tb_sprite sprite = *anim->sprite;
+	enum tb_color *colors = anim->data[anim->_frames - 1];
 
-	pthread_cancel(animation->_thread);
+	pthread_cancel(anim->_thread);
 	TB_SPRITE_FILL(sprite, colors);
 	tb_sprite_redraw(&sprite);
 
@@ -59,20 +58,20 @@ int tb_animation_stop(struct tb_animation *animation)
 
 static void *animate(void *arg)
 {
-	struct tb_animation *animation = arg;
-	struct tb_sprite sprite = *animation->sprite;
+	struct tb_anim *anim = arg;
+	struct tb_sprite sprite = *anim->sprite;
 	enum tb_color *colors;
 	int i;
 
 	i = 0;
 	while (1) {
-		colors = animation->data[i];
+		colors = anim->data[i];
 		/* TODO: Assign pointer instead of copying? */
 		TB_SPRITE_FILL(sprite, colors);
 		tb_sprite_redraw(&sprite);
 
-		tb_msleep(animation->delays[i]);
-		i = (i + 1) % animation->_frames;
+		tb_msleep(anim->delays[i]);
+		i = (i + 1) % anim->_frames;
 	}
 
 	return NULL;
