@@ -14,8 +14,12 @@
 #define BYTES_PER_CHAR 32
 #define MAGIC_CHAR ' '
 
-static void screen_clear(void);
-static void screen_showcursor(int visible);
+#define CODE_CLEARSCREEN "\ec"
+#define CODE_DEFINECOLOR "\e]P%X%.6X"
+#define CODE_HIDECURSOR "\e[?25l"
+#define CODE_MOVECURSOR "\e[%d;%df"
+#define CODE_RESETPALETTE "\e]R"
+#define CODE_SETCOLOR "\e[%d;3%dm"
 
 static int pixel_mode = 0;
 
@@ -69,8 +73,8 @@ int tb_screen_init(int pixel_size)
 
 	}
 
-	screen_showcursor(0);
-	screen_clear();
+	printf(CODE_CLEARSCREEN);
+	printf(CODE_HIDECURSOR);
 
 	return 0;
 }
@@ -83,7 +87,7 @@ void tb_screen_size(int *width, int *height)
 
 void tb_screen_color(enum tb_color color, int value)
 {
-	printf("\e]P%X%.6X", color, value);
+	printf(CODE_DEFINECOLOR, color, value);
 }
 
 /* TODO: Always put coords last? */
@@ -97,9 +101,9 @@ int tb_screen_put(int x, int y, enum tb_color color)
 	pthread_mutex_lock(&print_lock);
 	if (color_map[x + y*size.ws_col] != color) {
 		if (x != lastx+1 || y != lasty)
-			printf("\e[%d;%df", y+1, x+1);
+			printf(CODE_MOVECURSOR, y+1, x+1);
 
-		printf("\e[%d;3%dm%c",
+		printf(CODE_SETCOLOR "%c",
 			(color & TB_COLOR_BOLD) != 0,
 			color & ~TB_COLOR_BOLD,
 			MAGIC_CHAR);
@@ -121,8 +125,8 @@ int tb_screen_flush(void)
 int tb_screen_restore(void)
 {
 	if (pixel_mode) {
-		screen_showcursor(1);
-		screen_clear();
+		printf(CODE_CLEARSCREEN);
+		printf(CODE_RESETPALETTE);
 		size.ws_col = size.ws_row = 0;
 		free(color_map);
 
@@ -132,19 +136,4 @@ int tb_screen_restore(void)
 	}
 
 	return 0;
-}
-
-static void screen_clear(void)
-{
-	printf("\e[2J");
-	printf("\e[f");
-}
-
-/* TODO: use booleans? */
-static void screen_showcursor(int visible)
-{
-	if (visible)
-		printf("\e[?25h");
-	else
-		printf("\e[?25l");
 }
