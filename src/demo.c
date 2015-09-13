@@ -62,7 +62,8 @@ int main(void)
 	/* Initialize a new sprite with the specified dimensions */
 	tb_sprite_init(&fill0, 1, 1);
 
-	/* TB_SPRITE_COLOR can get or set a sprite's color at a
+	/*
+	 * TB_SPRITE_COLOR can get or set a sprite's color at a
 	 * particular position.  Note that, unlike tb_sprite_init, it
 	 * does *not* accept a pointer argument (because it is
 	 * implemented as a macro)
