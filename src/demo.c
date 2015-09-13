@@ -225,6 +225,7 @@ void *start_playing(void *arg)
 	int frequency;
 
 	switch (note) {
+	default:
 	case 'A':
 		frequency = 440;
 		break;
