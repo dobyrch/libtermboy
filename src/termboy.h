@@ -57,13 +57,11 @@ int tb_screen_restore(void);
 int tb_key_listen(enum tb_listen_mode);
 int tb_key_restore(void);
 int tb_key_pressed(int key);
-/*
-TODO: Merge into single function
-pass in tb_event (e.g. TB_EVENT_PRESS)
-*/
-void tb_key_handle_press(int key, void *(*handler)(void *), void *args);
-void tb_key_handle_release(int key, void *(*handler)(void *), void *args);
-void tb_key_handle_hold(int key, void *(*handler)(void *), void *args);
+void tb_key_handle(int key,
+		void *(*press_handler)(void *),
+		void *(*hold_handler)(void *),
+		void *(*release_handler)(void *),
+		void *args);
 
 struct tb_sprite *tb_sprite_background(void);
 int tb_sprite_init(struct tb_sprite *sprite, int width, int height);

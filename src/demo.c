@@ -9,7 +9,8 @@
 void *start_walking(void *arg);
 void *keep_walking(void *arg);
 void *stop_walking(void *arg);
-void *play_ocarina(void *arg);
+void *start_playing(void *arg);
+void *stop_playing(void *arg);
 void handler(int sig);
 
 static struct tb_sprite player, mountains, trees, waves, fill0, fill1, fill2;
@@ -146,19 +147,15 @@ int main(void)
 	 * Register functions to be called (on separate threads) when
 	 * certain key events occur. Keys are defined in linux/input.h.
 	 */
-	tb_key_handle_press(KEY_RIGHT, start_walking, &right);
-	tb_key_handle_press(KEY_LEFT, start_walking, &left);
-	tb_key_handle_hold(KEY_RIGHT, keep_walking, &right);
-	tb_key_handle_hold(KEY_LEFT, keep_walking, &left);
-	tb_key_handle_release(KEY_RIGHT, stop_walking, &right);
-	tb_key_handle_release(KEY_LEFT, stop_walking, &left);
-	tb_key_handle_hold(KEY_A, play_ocarina, "A");
-	tb_key_handle_hold(KEY_B, play_ocarina, "B");
-	tb_key_handle_hold(KEY_C, play_ocarina, "C");
-	tb_key_handle_hold(KEY_D, play_ocarina, "D");
-	tb_key_handle_hold(KEY_E, play_ocarina, "E");
-	tb_key_handle_hold(KEY_F, play_ocarina, "F");
-	tb_key_handle_hold(KEY_G, play_ocarina, "G");
+	tb_key_handle(KEY_RIGHT, start_walking, keep_walking, stop_walking, &right);
+	tb_key_handle(KEY_LEFT, start_walking, keep_walking, stop_walking, &left);
+	tb_key_handle(KEY_A, start_playing, NULL, stop_playing, "A");
+	tb_key_handle(KEY_B, start_playing, NULL, stop_playing, "B");
+	tb_key_handle(KEY_C, start_playing, NULL, stop_playing, "C");
+	tb_key_handle(KEY_D, start_playing, NULL, stop_playing, "D");
+	tb_key_handle(KEY_E, start_playing, NULL, stop_playing, "E");
+	tb_key_handle(KEY_F, start_playing, NULL, stop_playing, "F");
+	tb_key_handle(KEY_G, start_playing, NULL, stop_playing, "G");
 
 	/*
 	 * Begin listening for key events.  This call will block until
@@ -221,7 +218,7 @@ void *stop_walking(void *arg)
 	return NULL;
 }
 
-void *play_ocarina(void *arg)
+void *start_playing(void *arg)
 {
 	char note = *(char *)arg;
 	int frequency;
@@ -249,7 +246,14 @@ void *play_ocarina(void *arg)
 		frequency = 392;
 		break;
 	}
-	tb_beep(frequency, 300);
+	tb_tone_start(frequency);
+
+	return NULL;
+}
+
+void *stop_playing(void *arg)
+{
+	tb_tone_stop();
 
 	return NULL;
 }

@@ -20,9 +20,7 @@ static int pressed[128];
 static void *(*press_handlers[128])(void *);
 static void *(*release_handlers[128])(void *);
 static void *(*hold_handlers[128])(void *);
-static void *press_args[128];
-static void *release_args[128];
-static void *hold_args[128];
+static void *handler_args[128];
 static pthread_t hold_threads[128];
 
 int tb_key_listen(enum tb_listen_mode mode)
@@ -48,33 +46,23 @@ int tb_key_pressed(int key)
 		return -1;
 }
 
-void tb_key_handle_press(int key, void *(*handler)(void *), void *args)
+void tb_key_handle(int key,
+		void *(*press_handler)(void *),
+		void *(*hold_handler)(void *),
+		void *(*release_handler)(void *),
+		void *args)
 {
-	press_handlers[key] = handler;
-	press_args[key] = args;
-}
-
-void tb_key_handle_release(int key, void *(*handler)(void *), void *args)
-{
-	release_handlers[key] = handler;
-	release_args[key] = args;
-}
-
-/*
-TODO: Add parameter for interval
-So user doesn't have to bother with creating struct for nanosleep
-*/
-void tb_key_handle_hold(int key, void *(*handler)(void *), void *args)
-{
-	hold_handlers[key] = handler;
-	hold_args[key] = args;
+	press_handlers[key] = press_handler;
+	hold_handlers[key] = hold_handler;
+	release_handlers[key] = release_handler;
+	handler_args[key] = args;
 }
 
 static void *repeat(void *key)
 {
 	int k = *(int *)key;
 	void *(*handler)(void *) = hold_handlers[k];
-	void *args = hold_args[k];
+	void *args = handler_args[k];
 
 	while (1) {
 		pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
@@ -141,7 +129,7 @@ static void *key_listen_helper(void *arg)
 			if (release_handlers[key]) {
 				pthread_create(&thread, &attr,
 						release_handlers[key],
-						release_args[key]);
+						handler_args[key]);
 			}
 			pressed[key] = 0;
 		} else {
@@ -150,7 +138,7 @@ static void *key_listen_helper(void *arg)
 			if (press_handlers[key]) {
 				pthread_create(&thread, &attr,
 						press_handlers[key],
-						press_args[key]);
+						handler_args[key]);
 			}
 			if (hold_handlers[key]) {
 				pthread_create(&hold_threads[key], &attr,
