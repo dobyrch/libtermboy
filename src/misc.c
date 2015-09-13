@@ -14,11 +14,10 @@ int tb_msleep(int milliseconds)
 
 int tb_beep(int frequency, int duration)
 {
-	printf("\e[10;%d]\e[11;%d]\a", frequency, duration);
-	fflush(stdout);
+	FAILIF(tb_tone_start(frequency));
 	tb_msleep(duration);
+	FAILIF(tb_tone_stop());
 
-	/* TODO: error handling */
 	return 0;
 }
 
