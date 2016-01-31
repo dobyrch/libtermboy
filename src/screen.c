@@ -14,12 +14,12 @@
 #define BYTES_PER_CHAR 32
 #define MAGIC_CHAR ' '
 
-#define CODE_CLEARSCREEN "\ec"
-#define CODE_DEFINECOLOR "\e]P%X%.6X"
-#define CODE_HIDECURSOR "\e[?25l"
-#define CODE_MOVECURSOR "\e[%d;%df"
-#define CODE_RESETPALETTE "\e]R"
-#define CODE_SETCOLOR "\e[%d;3%dm"
+#define CODE_CLEARSCREEN "\x1B""c"
+#define CODE_DEFINECOLOR "\x1B]P%X%.6X"
+#define CODE_HIDECURSOR "\x1B[?25l"
+#define CODE_MOVECURSOR "\x1B[%d;%df"
+#define CODE_RESETPALETTE "\x1B]R"
+#define CODE_SETCOLOR "\x1B[%d;3%dm"
 
 static int pixel_mode = 0;
 
