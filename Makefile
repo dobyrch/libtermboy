@@ -1,9 +1,9 @@
 CC = clang
 OUT_DIR = out
 SRC_DIR = src
-CFLAGS = -I$(SRC_DIR) -fPIC -g -O -Wall
 LDFLAGS = -L$(OUT_DIR)
 LDLIBS = -lpthread -ltermboy
+CFLAGS = -I$(SRC_DIR) -fPIC -g -O -Wall -ansi -pedantic
 _OBJECTS = keyboard screen sprite animation misc
 
 OBJECTS = $(patsubst %,$(OUT_DIR)/%.o,$(_OBJECTS))

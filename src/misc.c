@@ -2,6 +2,7 @@
 #include <stropts.h>
 #include <unistd.h>
 #include <linux/kd.h>
+#include <sys/select.h>
 #include "common.h"
 #include "termboy.h"
 
@@ -9,7 +10,10 @@
 
 int tb_msleep(int milliseconds)
 {
-	return usleep(milliseconds*1000);
+	struct timeval timeout;
+	timeout.tv_sec = milliseconds / 1000;
+	timeout.tv_usec = milliseconds%1000 * 1000;
+	return select(0, NULL, NULL, NULL, &timeout);
 }
 
 int tb_beep(int frequency, int duration)

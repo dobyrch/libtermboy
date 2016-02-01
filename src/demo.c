@@ -1,3 +1,4 @@
+#define _POSIX_SOURCE
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>

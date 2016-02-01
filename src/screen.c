@@ -46,7 +46,7 @@ int tb_screen_init(int pixel_size)
 		orig_font.data = orig_font_data;
 		FAILIF(ioctl(STDOUT_FILENO, KDFONTOP, &orig_font));
 
-		if (isatty(fileno(stderr)))
+		if (isatty(STDERR_FILENO))
 			freopen("/dev/null", "w", stderr);
 	}
 
